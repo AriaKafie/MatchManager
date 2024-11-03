@@ -15,7 +15,6 @@ public:
     void kill() { write_to_stdin("stop\nquit\n"); }
     std::string read_stdout();
     std::string best_move();
-    std::string board_string();
     std::string name() const { return m_name; }
 
     int wins;

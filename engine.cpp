@@ -17,14 +17,6 @@ static std::string strip(const std::string& input)
     return input.substr(first, last - first + 1);
 }
 
-std::string Engine::board_string()
-{
-    write_to_stdin("d\n");
-
-    for (std::string board;; board = read_stdout())
-        if (!board.empty()) return board;
-}
-
 std::string Engine::best_move()
 {
     write_to_stdin("go movetime " + std::to_string(m_thinktime) + "\n");
