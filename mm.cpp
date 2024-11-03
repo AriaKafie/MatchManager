@@ -88,12 +88,7 @@ void Match::run_games()
             }
         }
 
-        if (stop)
-        {
-            e1.kill();
-            e2.kill();
-            return;
-        }
+        if (stop) return;
     }
 }
 
@@ -103,11 +98,9 @@ int main()
 
     Match m("C:\\Users\\14244\\Desktop\\chess\\mm\\engines\\tt256.exe",
             "C:\\Users\\14244\\Desktop\\chess\\mm\\engines\\tt256.exe",
-            50, 50, 0, "C:\\Users\\14244\\Desktop\\chess\\mm\\lc01k.txt");
+            500, 500, 0, "C:\\Users\\14244\\Desktop\\chess\\mm\\lc01k.txt");
 
     m.run_games();
 
     std::cout << "Exiting successfully\n" << std::endl;
-
-    return 0;
 }
