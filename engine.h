@@ -8,12 +8,15 @@
 class Engine
 {
 public:
-    Engine(const char *exe, int thinktime);
-   ~Engine() { write_to_stdin("stop\nquit\n"); }
+    Engine(const std::string &path, int thinktime);
+   ~Engine() { kill(); }
 
     void write_to_stdin(const std::string& message);
+    void kill() { write_to_stdin("stop\nquit\n"); }
     std::string read_stdout();
     std::string best_move();
+    std::string board_string();
+    std::string name() const { return m_name; }
 
     int wins;
 
@@ -22,6 +25,8 @@ private:
     HANDLE m_stdin;
     HANDLE m_stdout;
     HANDLE m_process;
+
+    std::string m_name;
 };
 
 #endif

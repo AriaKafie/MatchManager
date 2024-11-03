@@ -29,13 +29,15 @@ public:
     void set(const std::string& fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 ");
     void do_move(Move m);
     void update_castling_rights(Color just_moved);
-    std::string fen();
-    std::string to_string();
+    std::string fen() const;
+    std::string to_string() const;
     GameState game_state();
 
     bool kingside_rights  (Color Perspective) const { return state_info.castling_rights & (Perspective == WHITE ? 0b1000 : 0b0010); }
     bool queenside_rights (Color Perspective) const { return state_info.castling_rights & (Perspective == WHITE ? 0b0100 : 0b0001); }
     bool white_to_move() const { return state_info.side_to_move == WHITE; }
+
+    Color side_to_move() const { return state_info.side_to_move; }
 
     Piece piece_on(Square sq) const { return board[sq]; }
 

@@ -161,7 +161,7 @@ void Position::set(const std::string& fen)
     state_info.halfmove_clock = 0;
 }
 
-std::string Position::to_string()
+std::string Position::to_string() const
 {
     std::stringstream ss;
 
@@ -178,7 +178,7 @@ std::string Position::to_string()
     return ss.str() + "  a   b   c   d   e   f   g   h\n\nFen: " + fen() + "\n";
 }
 
-std::string Position::fen()
+std::string Position::fen() const
 {
     std::stringstream fen;
 

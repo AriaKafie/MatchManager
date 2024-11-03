@@ -17,6 +17,14 @@ static std::string strip(const std::string& input)
     return input.substr(first, last - first + 1);
 }
 
+std::string Engine::board_string()
+{
+    write_to_stdin("d\n");
+
+    for (std::string board;; board = read_stdout())
+        if (!board.empty()) return board;
+}
+
 std::string Engine::best_move()
 {
     write_to_stdin("go movetime " + std::to_string(m_thinktime) + "\n");
@@ -24,7 +32,7 @@ std::string Engine::best_move()
     std::this_thread::sleep_for(std::chrono::milliseconds(m_thinktime));
 
     for (std::string std_out;; std_out = read_stdout())
-        if (size_t s = std_out.find("bestmove"); s != std::string::npos) return strip(std_out.substr(s + 9));
+        if (size_t s = std_out.rfind("bestmove"); s != std::string::npos) return strip(std_out.substr(s + 9));
 }
 
 void Engine::write_to_stdin(const std::string& message)
@@ -48,11 +56,14 @@ std::string Engine::read_stdout()
     return strip(std::string(buffer));
 }
 
-Engine::Engine(const char *exe, int thinktime) : m_stdin    (NULL),
-                                                 m_stdout   (NULL),
-                                                 m_thinktime(thinktime),
-                                                 wins       (0)
+Engine::Engine(const std::string &path, int thinktime) : m_stdin    (NULL),
+                                                         m_stdout   (NULL),
+                                                         m_thinktime(thinktime),
+                                                         wins       (0)
 {
+    std::string relative_path = path.find('\\') == std::string::npos ? path : path.substr(path.rfind('\\') + 1);
+    m_name = relative_path.substr(0, relative_path.find(".exe"));
+
     PROCESS_INFORMATION piProcInfo;
     STARTUPINFO siStartInfo;
     SECURITY_ATTRIBUTES saAttr;
@@ -82,9 +93,9 @@ Engine::Engine(const char *exe, int thinktime) : m_stdin    (NULL),
     siStartInfo.hStdInput = hChildStdinRd;
     siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
 
-    int len = strlen(exe) + 1;
+    int len = strlen(path.c_str()) + 1;
     LPWSTR wexe = new WCHAR[len];
-    MultiByteToWideChar(CP_ACP, 0, exe, -1, wexe, len);
+    MultiByteToWideChar(CP_ACP, 0, path.c_str(), -1, wexe, len);
 
     // Create the child process
     if (!CreateProcess(NULL, wexe, NULL, NULL, TRUE, 0, NULL, NULL, &siStartInfo, &piProcInfo))
