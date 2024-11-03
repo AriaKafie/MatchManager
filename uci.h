@@ -17,7 +17,7 @@ inline std::string square_to_uci(Square sq) {
 
 inline std::string move_to_uci(Move m)
 {
-    return type_of(m) == PROMOTION ? square_to_uci(from_sq(m)) + square_to_uci(to_sq(m)) + "   kbrq"[promotion_type(m)]
+    return type_of(m) == PROMOTION ? square_to_uci(from_sq(m)) + square_to_uci(to_sq(m)) + "   nbrq"[promotion_type(m)]
                                    : square_to_uci(from_sq(m)) + square_to_uci(to_sq(m));
 }
 
