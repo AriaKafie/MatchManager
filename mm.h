@@ -14,7 +14,7 @@ public:
         : e1(path_1, time_1),
           e2(path_2, time_2), m_id(id), draws(0)
     {
-        log.open(std::to_string(time_1) + std::to_string(time_2) + "m_id" + std::to_string(m_id));
+        log.open(e1.name() + e2.name() + std::to_string(time_1) + std::to_string(time_2) + "m_id" + std::to_string(m_id) + ".txt");
         fenfile.open(fenpath);
     }
 

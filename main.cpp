@@ -18,7 +18,6 @@
 void handle_stop(bool *sigstop)
 {
     std::string in;
-
     do
         std::getline(std::cin, in);
     while (in != "stop");
@@ -62,7 +61,6 @@ void Match::run_games()
         {
             Engine &engine = pos.side_to_move() == e1_color ? e1 : e2;
 
-            system("cls");
             refresh(fen, pos, e1, e2, draws);
 
             std::string movestr = engine.best_move();
