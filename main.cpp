@@ -3,6 +3,7 @@
 #include <chrono>
 #include <thread>
 #include <sstream>
+#include <fstream>
 
 #include "bitboard.h"
 #include "engine.h"
@@ -13,30 +14,79 @@ int main()
 {
     Bitboards::init();
 
-    Position pos("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -");
+    std::ofstream log("log.txt");
 
-    std::string tokens, token;
-    do
+    Engine e1("C:\\Users\\14244\\Desktop\\chess\\mm\\engines\\allcaps.exe", 100);
+    Engine e2("C:\\Users\\14244\\Desktop\\chess\\mm\\engines\\allcaps.exe", 100);
+
+    Position    pos;
+    std::string movestr;
+    Move        best_move;
+
+    while (1)
     {
-        std::getline(std::cin, tokens);
-        
-        std::istringstream is(tokens);
-        is >> token;
+        pos.set();
+        e1.write_to_stdin("ucinewgame\nposition startpos\n");
+        e2.write_to_stdin("ucinewgame\nposition startpos\n");
 
-        if (token == "d")
+        while (1)
         {
+            system("cls");
             std::cout << pos.to_string() << std::endl;
-        }
-        else if (token == "moves")
-        {
-            for (Move m; is >> token && (m=uci_to_move(token, pos)); pos.do_move(m));
-        }
-        else if (token == "position")
-        {
-            std::string pieces, color, castling, enpassant;
-            is >> pieces >> color >> castling >> enpassant;
-            pos.set(pieces + " " + color + " " + castling + " " + enpassant);
-        }
 
-    } while(tokens != "quit");
+            log << pos.to_string() << std::endl;
+
+            movestr = e1.best_move();
+            best_move = uci_to_move(movestr, pos);
+
+            log << "engine1: " << movestr << std::endl;
+
+            if (best_move == NULLMOVE)
+            {
+                std::cout << "invalid move: " << movestr << std::endl;
+                return 1;
+            }
+
+            e1.write_to_stdin("moves " + movestr + "\n");
+            e2.write_to_stdin("moves " + movestr + "\n");
+
+            pos.do_move(best_move);
+            system("cls");
+            std::cout << pos.to_string() << std::endl;
+
+            log << pos.to_string() << std::endl;
+
+            if (GameState g = pos.game_state(); g != ONGOING)
+            {
+                e1.wins++;
+                break;
+            }
+
+            movestr = e2.best_move();
+            best_move = uci_to_move(movestr, pos);
+
+            log << "engine2: " << movestr << std::endl;
+
+            if (best_move == NULLMOVE)
+            {
+                std::cout << "invalid move: " << movestr << std::endl;
+                return 1;
+            }
+
+            e1.write_to_stdin("moves " + movestr + "\n");
+            e2.write_to_stdin("moves " + movestr + "\n");
+
+            pos.do_move(best_move);
+            system("cls");
+            std::cout << pos.to_string() << std::endl;
+
+            if (GameState g = pos.game_state(); g != ONGOING)
+            {
+                e2.wins++;
+                break;
+            }
+        }
+    }
+
+    std::cout << "done" << std::endl;
 }

@@ -9,6 +9,8 @@
 
 constexpr int MAX_MOVES = 128;
 
+enum GameState { ONGOING, MATE, DRAW };
+
 struct StateInfo
 {
     Square  ep_sq;
@@ -20,15 +22,16 @@ struct StateInfo
 class Position
 {
 public:
-    Position(const std::string& fen) { set(fen); }
+    Position() { set(); }
 
     Move *get_moves(Move *list);
 
-    void set(const std::string& fen);
+    void set(const std::string& fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 ");
     void do_move(Move m);
     void update_castling_rights(Color just_moved);
     std::string fen();
     std::string to_string();
+    GameState game_state();
 
     bool kingside_rights  (Color Perspective) const { return state_info.castling_rights & (Perspective == WHITE ? 0b1000 : 0b0010); }
     bool queenside_rights (Color Perspective) const { return state_info.castling_rights & (Perspective == WHITE ? 0b0100 : 0b0001); }

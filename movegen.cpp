@@ -169,8 +169,6 @@ Move *generate_moves(const Position *pos, Move *list)
     return list;
 }
 
-extern StateInfo *state_ptr;
-
 Move *Position::get_moves(Move *list)
 {
     return white_to_move() ? generate_moves<WHITE>(this, list)

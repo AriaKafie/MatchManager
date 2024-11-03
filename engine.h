@@ -12,9 +12,10 @@ public:
    ~Engine() { write_to_stdin("stop\nquit\n"); }
 
     void write_to_stdin(const std::string& message);
-    std::string board_string();
     std::string read_stdout();
     std::string best_move();
+
+    int wins;
 
 private:
     int    m_thinktime;

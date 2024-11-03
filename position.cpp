@@ -9,6 +9,17 @@
 
 constexpr std::string_view piece_to_char = "  PNBRQK  pnbrqk";
 
+GameState Position::game_state()
+{
+    if (state_info.halfmove_clock >= 100)
+        return DRAW;
+    
+    if (Move list[MAX_MOVES], *end = get_moves(list); list == end)
+        return MATE;
+
+    return ONGOING;
+}
+
 void Position::update_castling_rights(Color just_moved)
 {
     Bitboard mask = just_moved == WHITE ? square_bb(A1, E1, H1, A8, H8) : square_bb(A8, E8, H8, A1, H1);
@@ -164,7 +175,7 @@ std::string Position::to_string()
             ss << "| " << (sq / 8 + 1) << "\n+---+---+---+---+---+---+---+---+\n";
     }
 
-    return ss.str() + "  a   b   c   d   e   f   g   h\n\n" + fen() + "\n";
+    return ss.str() + "  a   b   c   d   e   f   g   h\n\nFen: " + fen() + "\n";
 }
 
 std::string Position::fen()

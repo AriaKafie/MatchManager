@@ -13,8 +13,7 @@ typedef uint8_t  Color;
 typedef int8_t   Direction;
 typedef int8_t   Square;
 
-constexpr Move NO_MOVE = 0;
-constexpr Move NULL_MOVE = 0;
+constexpr Move NULLMOVE = 0;
 
 enum { WHITE, BLACK, COLOR_NB = 2 };
 

@@ -27,14 +27,6 @@ std::string Engine::best_move()
         if (size_t s = std_out.find("bestmove"); s != std::string::npos) return strip(std_out.substr(s + 9));
 }
 
-std::string Engine::board_string()
-{
-    write_to_stdin("d\n");
-
-    for (std::string board;; board = read_stdout())
-        if (!board.empty()) return board;
-}
-
 void Engine::write_to_stdin(const std::string& message)
 {
     DWORD written;
@@ -58,7 +50,8 @@ std::string Engine::read_stdout()
 
 Engine::Engine(const char *exe, int thinktime) : m_stdin    (NULL),
                                                  m_stdout   (NULL),
-                                                 m_thinktime(thinktime)
+                                                 m_thinktime(thinktime),
+                                                 wins       (0)
 {
     PROCESS_INFORMATION piProcInfo;
     STARTUPINFO siStartInfo;
