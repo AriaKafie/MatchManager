@@ -24,7 +24,6 @@ private:
     int    m_thinktime;
     HANDLE m_stdin;
     HANDLE m_stdout;
-    HANDLE m_process;
 
     std::string m_name;
 };

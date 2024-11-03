@@ -1,7 +1,9 @@
 
 #include "position.h"
 
+#include <algorithm>
 #include <cstring>
+#include <random>
 #include <sstream>
 
 #include "bitboard.h"
@@ -9,21 +11,63 @@
 
 constexpr std::string_view piece_to_char = "  PNBRQK  pnbrqk";
 
+namespace Zobrist
+{
+    static uint64_t Side = 0xeeb3b2fe864d41e5ull;
+    static uint64_t hash[B_KING + 1][SQUARE_NB];
+    static uint64_t enpassant[SQUARE_NB];
+    static uint64_t castling[1 << 4];
+}
+
+uint64_t Position::hash() const
+{
+    uint64_t key = side_to_move() == WHITE ? 0 : Zobrist::Side;
+
+    for (Square sq = H1; sq <= A8; sq++)
+        key ^= Zobrist::hash[piece_on(sq)][sq];
+    
+    return key ^ Zobrist::castling[state_info.castling_rights]
+               ^ Zobrist::enpassant[state_info.ep_sq];
+}
+
+void Position::init()
+{
+    std::mt19937_64 rng(221564671644);
+
+    memset(Zobrist::hash, 0, sizeof(Zobrist::hash));
+
+    for (Piece pc : { W_PAWN, W_KNIGHT, W_BISHOP, W_ROOK, W_QUEEN, W_KING,
+                      B_PAWN, B_KNIGHT, B_BISHOP, B_ROOK, B_QUEEN, B_KING })
+    {
+        for (Square sq = H1; sq <= A8; sq++)
+            Zobrist::hash[pc][sq] = rng();
+    }
+
+    for (uint8_t castling_rights = 0; castling_rights <= 0b1111; castling_rights++)
+        Zobrist::castling[castling_rights] = rng();
+
+    Zobrist::enpassant[0] = 0ull;
+
+    for (Square s = G1; s <= A8; Zobrist::enpassant[s++] = rng());
+}
+
 GameState Position::game_state()
 {
     if (state_info.halfmove_clock >= 100)
         return DRAW;
+
+    uint64_t key = hash();
+    for (int i = history.size() - 2, occurrences = 1; i >= 0 ; i--)
+    {
+        if (history[i] == key) occurrences++;
+
+        if (occurrences == 3) return DRAW;
+    }       
     
     if (Move list[MAX_MOVES], *end = get_moves(list); list == end)
         return MATE;
 
     return ONGOING;
-}
-
-void Position::update_castling_rights(Color just_moved)
-{
-    Bitboard mask = just_moved == WHITE ? square_bb(A1, E1, H1, A8, H8) : square_bb(A8, E8, H8, A1, H1);
-    state_info.castling_rights &= castle_masks[just_moved][pext(bitboards[just_moved], mask)];
 }
 
 void Position::do_move(Move m)
@@ -65,6 +109,7 @@ void Position::do_move(Move m)
 
         update_castling_rights(us);
         
+        history.push_back(hash());
         return;
     case PROMOTION:
     {
@@ -81,6 +126,7 @@ void Position::do_move(Move m)
         
         update_castling_rights(us);
         
+        history.push_back(hash());
         return;
     }
     case CASTLING:
@@ -103,6 +149,7 @@ void Position::do_move(Move m)
 
         update_castling_rights(us);
 
+        history.push_back(hash());
         return;
     }
     case ENPASSANT:
@@ -119,8 +166,15 @@ void Position::do_move(Move m)
         board[to] = Pawn;
         board[capsq] = NO_PIECE;
 
+        history.push_back(hash());
         return;
     }
+}
+
+void Position::update_castling_rights(Color just_moved)
+{
+    Bitboard mask = just_moved == WHITE ? square_bb(A1, E1, H1, A8, H8) : square_bb(A8, E8, H8, A1, H1);
+    state_info.castling_rights &= castle_masks[just_moved][pext(bitboards[just_moved], mask)];
 }
 
 void Position::set(const std::string& fen)
@@ -159,6 +213,9 @@ void Position::set(const std::string& fen)
         state_info.ep_sq = uci_to_square(enpassant);
 
     state_info.halfmove_clock = 0;
+
+    history.clear();
+    history.push_back(hash());
 }
 
 std::string Position::to_string() const
@@ -175,7 +232,9 @@ std::string Position::to_string() const
             ss << "| " << (sq / 8 + 1) << "\n+---+---+---+---+---+---+---+---+\n";
     }
 
-    return ss.str() + "  a   b   c   d   e   f   g   h\n\nFen: " + fen() + "\n";
+    ss << "  a   b   c   d   e   f   g   h\n\nFen: " << fen() << "\nKey: " << std::hex << std::uppercase << hash() << "\n";
+
+    return ss.str();
 }
 
 std::string Position::fen() const

@@ -77,17 +77,15 @@ Engine::Engine(const std::string &path, int thinktime) : m_stdin    (NULL),
 
     HANDLE hChildStdoutWr, hChildStdinRd;
 
-    // Create pipes for the child's STDOUT and STDIN
-    if (!CreatePipe(&m_stdout, &hChildStdoutWr, &saAttr, 0)     ||  // stdout pipe
-        !SetHandleInformation(m_stdout, HANDLE_FLAG_INHERIT, 0) ||  // Make read handle non-inheritable
-        !CreatePipe(&hChildStdinRd, &m_stdin, &saAttr, 0)       ||  // stdin pipe
+    if (!CreatePipe(&m_stdout, &hChildStdoutWr, &saAttr, 0)     ||
+        !SetHandleInformation(m_stdout, HANDLE_FLAG_INHERIT, 0) ||
+        !CreatePipe(&hChildStdinRd, &m_stdin, &saAttr, 0)       ||
         !SetHandleInformation(m_stdin, HANDLE_FLAG_INHERIT, 0))
     {
         std::cerr << "Error creating pipes." << std::endl;
         std::exit(1);
     }
 
-    // Configure the STARTUPINFO structure for redirection
     siStartInfo.hStdError = hChildStdoutWr;
     siStartInfo.hStdOutput = hChildStdoutWr;
     siStartInfo.hStdInput = hChildStdinRd;
@@ -97,7 +95,6 @@ Engine::Engine(const std::string &path, int thinktime) : m_stdin    (NULL),
     LPWSTR wexe = new WCHAR[len];
     MultiByteToWideChar(CP_ACP, 0, path.c_str(), -1, wexe, len);
 
-    // Create the child process
     if (!CreateProcess(NULL, wexe, NULL, NULL, TRUE, 0, NULL, NULL, &siStartInfo, &piProcInfo))
     {
         std::cerr << "CreateProcess failed." << std::endl;
@@ -106,9 +103,6 @@ Engine::Engine(const std::string &path, int thinktime) : m_stdin    (NULL),
 
     delete[] wexe;
 
-    m_process = piProcInfo.hProcess;
-
-    // Close unneeded handles
     CloseHandle(piProcInfo.hProcess);
     CloseHandle(piProcInfo.hThread);
     CloseHandle(hChildStdoutWr);

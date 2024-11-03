@@ -28,9 +28,11 @@ void handle_stop(bool *stop)
 void refresh(const std::string& fen, const Position& pos, const Engine& e1, const Engine& e2, int draws)
 {
     system("cls");
-    printf("%s\n%s\n%s: %d\n%s: %d\ndraws: %d\n",
-           fen.c_str(), pos.to_string().c_str(), e1.name().c_str(), e1.wins, e2.name().c_str(), e2.wins, draws);
-    std::cout << std::endl;
+    std::cout << fen << '\n'
+              << pos.to_string() << '\n'
+              << e1.name() << ": " << e1.wins << '\n'
+              << e2.name() << ": " << e2.wins << '\n'
+              << "draws: " << draws << "\n" << std::endl;
 }
 
 void Match::run_games()
@@ -95,10 +97,11 @@ void Match::run_games()
 int main()
 {
     Bitboards::init();
+    Position::init();
 
     Match m("C:\\Users\\14244\\Desktop\\chess\\mm\\engines\\tt256.exe",
             "C:\\Users\\14244\\Desktop\\chess\\mm\\engines\\tt256.exe",
-            500, 500, 0, "C:\\Users\\14244\\Desktop\\chess\\mm\\lc01k.txt");
+            100, 100, 0, "C:\\Users\\14244\\Desktop\\chess\\mm\\lc01k.txt");
 
     m.run_games();
 

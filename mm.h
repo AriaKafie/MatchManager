@@ -18,7 +18,7 @@ public:
         fenfile.open(fenpath);
     }
 
-    ~Match() { log.close(); fenfile.close(); }
+    ~Match() { log.close(); fenfile.close(); e1.kill(); e2.kill(); }
 
     void run_games();
 

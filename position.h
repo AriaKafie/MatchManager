@@ -3,6 +3,7 @@
 #define POSITION_H
 
 #include <string>
+#include <vector>
 
 #include "bitboard.h"
 #include "types.h"
@@ -24,14 +25,16 @@ class Position
 public:
     Position() { set(); }
 
+    static void init();
+
     Move *get_moves(Move *list);
 
     void set(const std::string& fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 ");
     void do_move(Move m);
-    void update_castling_rights(Color just_moved);
     std::string fen() const;
     std::string to_string() const;
     GameState game_state();
+    uint64_t hash() const;
 
     bool kingside_rights  (Color Perspective) const { return state_info.castling_rights & (Perspective == WHITE ? 0b1000 : 0b0010); }
     bool queenside_rights (Color Perspective) const { return state_info.castling_rights & (Perspective == WHITE ? 0b0100 : 0b0001); }
@@ -52,10 +55,13 @@ public:
     Square ep_sq() const { return state_info.ep_sq; }
     
 private:
+    void update_castling_rights(Color just_moved);
+
     Bitboard bitboards[16];
     Piece board[SQUARE_NB];
 
     StateInfo state_info;
+    std::vector<uint64_t> history;
 };
 
 #endif
