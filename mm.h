@@ -25,13 +25,13 @@ public:
 
     void run_games();
 
-private:
-    Position pos;
-
     Engine e1;
     Engine e2;
-    int    m_id;
-    int    draws;
+    int draws;
+
+private:
+    Position pos;
+    int m_id;
     std::ofstream log;
     std::ifstream fenfile;
 };
