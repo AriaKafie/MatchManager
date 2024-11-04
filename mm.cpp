@@ -50,9 +50,9 @@ void Match::run_games()
     {
         std::string fen = fens[i];
         printf("Match %d: %s: %d %s: %d draws: %d game: %d/%d\n",
-               m_id + 1, e1.name().c_str(), e1.wins, e2.name().c_str(), e2.wins, draws, i + 1, fens.size());
+               m_id, e1.name().c_str(), e1.wins, e2.name().c_str(), e2.wins, draws, i + 1, fens.size());
 
-        log << "\n\n" << fen << std::endl;
+        log << "\n" << fen << std::endl;
 
         pos.set(fen);
 
@@ -83,8 +83,11 @@ void Match::run_games()
 
             if (GameState g = pos.game_state(); g != ONGOING)
             {
-                if      (g == DRAW) draws++;
-                else if (g == MATE) engine.wins++;
+                if (g == MATE) engine.wins++;
+                else           draws++;
+
+                log << "\n"
+                    << e1.name() << ": " << e1.wins << " " << e2.name() << ": " << e2.wins << "draws: " << draws << std::endl;
 
                 break;
             }
@@ -98,19 +101,49 @@ void Match::run_games()
 
 int main(int argc, char **argv)
 {
-    int threads = 3;
+    std::string name_1, name_2;
+    int time    = DEFAULT_TIME;
+    int threads = DEFAULT_THREADS;
+
+    std::string tokens, token;
+    for (int i = 1; i < argc; tokens += std::string(argv[i++]) + " ");
+
+    std::istringstream args(tokens);
+
+    while (args >> token)
+    {
+        if (token.find("-time") != std::string::npos)
+        {
+            if (token == "-time")
+                args >> time;
+            else
+                time = std::stoi(token.substr(std::string("-time").size()));
+        }
+        else if (token.find("-threads") != std::string::npos)
+        {
+            if (token == "-threads")
+                args >> threads;
+            else
+                threads = std::stoi(token.substr(std::string("-threads").size()));
+        }
+        else
+        {
+            name_1 = token;
+            args >> name_2;
+        }
+    }
+
+    std::string path_1 = std::string("C:\\Users\\14244\\Desktop\\chess\\mm\\engines\\") + name_1 + ".exe",
+                path_2 = std::string("C:\\Users\\14244\\Desktop\\chess\\mm\\engines\\") + name_2 + ".exe";
 
     Bitboards::init();
     Position::init();
 
     std::vector<std::thread> thread_pool;
 
-    for (int thread = 0; thread < threads; thread++)
+    for (int id = 0; id < threads; id++)
     {
-        Match* m = new Match("C:\\Users\\14244\\Desktop\\chess\\mm\\engines\\tt256.exe",
-                             "C:\\Users\\14244\\Desktop\\chess\\mm\\engines\\tt256.exe",
-                             100, 100, thread, "C:\\Users\\14244\\Desktop\\chess\\mm\\lc01k.txt");
-
+        Match* m = new Match(path_1, path_2, time, id, "lc01k.txt");
         thread_pool.emplace_back([m]() { run_match(m); });
     }
 
