@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <iomanip>
 #include <random>
 #include <sstream>
 
@@ -65,7 +66,17 @@ GameState Position::game_state()
     }       
     
     if (Move list[MAX_MOVES], *end = get_moves(list); list == end)
-        return MATE;
+    {
+        Color us = side_to_move(), them = !us;
+        Square ksq = lsb(bb(make_piece(us, KING)));
+
+        Bitboard checkers = PawnAttacks[us][ksq]            &  bb(make_piece(them, PAWN))
+                          | knight_attacks(ksq)             &  bb(make_piece(them, KNIGHT))
+                          | bishop_attacks(ksq, occupied()) & (bb(make_piece(them, QUEEN)) | bb(make_piece(them, BISHOP)))
+                          | rook_attacks(ksq, occupied())   & (bb(make_piece(them, QUEEN)) | bb(make_piece(them, ROOK)));
+
+        return checkers ? MATE : DRAW;
+    }
 
     return ONGOING;
 }
@@ -232,7 +243,7 @@ std::string Position::to_string() const
             ss << "| " << (sq / 8 + 1) << "\n+---+---+---+---+---+---+---+---+\n";
     }
 
-    ss << "  a   b   c   d   e   f   g   h\n\nFen: " << fen() << "\nKey: " << std::hex << std::uppercase << hash() << "\n";
+    ss << "  a   b   c   d   e   f   g   h\n\nFen: " << fen() << "\nKey: " << std::setw(16) << std::setfill('0') << std::hex << std::uppercase << hash() << "\n";
 
     return ss.str();
 }

@@ -5,6 +5,7 @@
 #include <cctype>
 #include <chrono>
 #include <thread>
+#include <sstream>
 
 static std::string strip(const std::string& input)
 {
@@ -24,7 +25,17 @@ std::string Engine::best_move()
     std::this_thread::sleep_for(std::chrono::milliseconds(m_thinktime));
 
     for (std::string std_out;; std_out = read_stdout())
-        if (size_t s = std_out.rfind("bestmove"); s != std::string::npos) return strip(std_out.substr(s + 9));
+    {
+        if (size_t s = std_out.rfind("bestmove"); s != std::string::npos)
+        {
+            std::istringstream is(std_out.substr(s));
+            std::string token;
+
+            is >> token >> token;
+
+            return strip(token);
+        }
+    }
 }
 
 void Engine::write_to_stdin(const std::string& message)
