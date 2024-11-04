@@ -99,7 +99,7 @@ void Match::run_games()
 
 int main(int argc, char **argv)
 {
-    std::string name_1, name_2;
+    std::string name_1, name_2, fenpath = "lc01k.txt";
     int time    = DEFAULT_TIME;
     int threads = DEFAULT_THREADS;
 
@@ -117,12 +117,19 @@ int main(int argc, char **argv)
             else
                 time = std::stoi(token.substr(std::string("-time").size()));
         }
-        else if (token.find("-threads") != std::string::npos)
+        else if (token.find("-thread") != std::string::npos)
         {
-            if (token == "-threads")
+            if (token == "-thread")
                 args >> threads;
             else
-                threads = std::stoi(token.substr(std::string("-threads").size()));
+                threads = std::stoi(token.substr(std::string("-thread").size()));
+        }
+        else if (token.find("-fen") != std::string::npos)
+        {
+            if (token == "-fen")
+                args >> fenpath;
+            else
+                fenpath = token.substr(std::string("-fen").size());
         }
         else
         {
@@ -142,7 +149,7 @@ int main(int argc, char **argv)
 
     for (int id = 0; id < threads; id++)
     {
-        Match* m = new Match(path_1, path_2, time, id, "lc01k.txt");
+        Match* m = new Match(path_1, path_2, time, id, fenpath);
         matches.push_back(m);
         thread_pool.emplace_back([m]() { run_match(m); });
     }
@@ -150,7 +157,8 @@ int main(int argc, char **argv)
     std::thread t([]() { await_stop(); });
     t.detach();
 
-    for (std::thread &t : thread_pool) t.join();
+    for (std::thread &thread : thread_pool)
+        thread.join();
 
     int e1_wins = 0, e2_wins = 0, draws = 0;
 
@@ -176,5 +184,5 @@ int main(int argc, char **argv)
     printf("| %-16s|%6d |%8.2f%% |\n", name_2.c_str(), e2_wins, e2_winrate * 100);
     printf("| Draws           |%6d |          |\n", draws);
     printf("| Decisive        |%6d |          |\n", decisive);
-    printf("| Total           |%6d |          |\n+-----------------+-------+----------+\n\n", total);
+    printf("| Total           |%6d |          |\n+-----------------+-------+----------+\n", total);
 }
