@@ -85,7 +85,7 @@ void Match::run_games()
                 else           draws++;
 
                 log << "\n"
-                    << e1.name() << ": " << e1.wins << " " << e2.name() << ": " << e2.wins << "draws: " << draws << std::endl;
+                    << e1.name() << ": " << e1.wins << " " << e2.name() << ": " << e2.wins << " draws: " << draws << std::endl;
 
                 break;
             }
@@ -138,8 +138,9 @@ int main(int argc, char **argv)
         }
     }
 
-    std::string path_1 = std::string("C:\\Users\\14244\\Desktop\\chess\\mm\\engines\\") + name_1 + ".exe",
-                path_2 = std::string("C:\\Users\\14244\\Desktop\\chess\\mm\\engines\\") + name_2 + ".exe";
+    // "C:\\Users\\14244\\Desktop\\chess\\mm\\engines\\"
+    std::string path_1 = std::string("engines\\") + name_1 + ".exe",
+                path_2 = std::string("engines\\") + name_2 + ".exe";
 
     Bitboards::init();
     Position::init();
