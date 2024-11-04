@@ -138,7 +138,6 @@ int main(int argc, char **argv)
         }
     }
 
-    // "C:\\Users\\14244\\Desktop\\chess\\mm\\engines\\"
     std::string path_1 = std::string("engines\\") + name_1 + ".exe",
                 path_2 = std::string("engines\\") + name_2 + ".exe";
 
