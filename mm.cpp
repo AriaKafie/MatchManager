@@ -189,5 +189,5 @@ int main(int argc, char **argv)
     printf("| %-16s|%6d |%8.2f%% |\n", name_1.c_str(), e1_wins, e1_winrate * 100);
     printf("| %-16s|%6d |%8.2f%% |\n", name_2.c_str(), e2_wins, e2_winrate * 100);
     printf("| Draws           |%6d |          |\n", draws);
-    printf("| Total           |%6d |          |\n+-----------------+-------+----------+\n", total);
+    printf("| Total           |%6d |%6d ms |\n+-----------------+-------+----------+\n", total, time);
 }
