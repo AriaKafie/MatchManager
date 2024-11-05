@@ -20,8 +20,6 @@ static volatile bool stop;
 
 void await_stop()
 {
-    stop = false;
-
     std::string in;
     do
         std::getline(std::cin, in);
@@ -47,8 +45,8 @@ void Match::run_games()
     for (int i = 0; i < fens.size(); i++)
     {
         std::string fen = fens[i];
-        printf("Match %d: %s: %d %s: %d draws: %d game: %d/%d\n",
-               m_id, e1.name().c_str(), e1.wins, e2.name().c_str(), e2.wins, draws, i + 1, fens.size());
+        printf("Match %d: %s: %d %s: %d Draws: %d Games: %d/%d\n",
+               m_id, e1.name().c_str(), e1.wins, e2.name().c_str(), e2.wins, draws, i, fens.size());
 
         pos.set(fen);
 
@@ -93,7 +91,7 @@ void Match::run_games()
                     draws++;
 
                 log << game_string << std::endl
-                    << e1.name() << ": " << e1.wins << " " << e2.name() << ": " << e2.wins << " draws: " << draws << "\n" << std::endl;
+                    << e1.name() << ": " << e1.wins << " " << e2.name() << ": " << e2.wins << " Draws: " << draws << "\n" << std::endl;
 
                 break;
             }
@@ -102,7 +100,7 @@ void Match::run_games()
         if (stop || failed) break;
     }
 
-    std::cout << "Match " << m_id << (failed ? " failed" : " done") << std::endl;
+    std::cout << "Match " << m_id << (failed ? ": Engine error" : ": Done") << std::endl;
 }
 
 int main(int argc, char **argv)
@@ -153,6 +151,7 @@ int main(int argc, char **argv)
     std::vector<Match*> matches;
     std::vector<std::thread> thread_pool;
 
+    stop = false;
     std::thread t([]() { await_stop(); });
     t.detach();
 
