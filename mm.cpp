@@ -102,7 +102,7 @@ void Match::run_games()
         if (stop || failed) break;
     }
 
-    std::cout << "Match " << m_id << " done" << std::endl;
+    std::cout << "Match " << m_id << (failed ? " failed" : " done") << std::endl;
 }
 
 int main(int argc, char **argv)
