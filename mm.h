@@ -14,10 +14,10 @@ class Match
 {
 public:
     Match(std::string path_1, std::string path_2, int time, int id, std::string fenpath)
-        : e1(path_1, time),
-          e2(path_2, time), m_id(id), draws(0)
+        : e1(path_1, time, id),
+          e2(path_2, time, id), m_id(id), draws(0), failed(false)
     {
-        log.open(e1.name()+"_"+e2.name()+"_"+std::to_string(time)+"_id_"+std::to_string(m_id)+".txt");
+        log.open(std::string("logs\\")+e1.name()+"_"+e2.name()+"_"+std::to_string(time)+"_id_"+std::to_string(m_id)+".txt");
         fenfile.open(fenpath);
     }
 
@@ -32,6 +32,7 @@ public:
 private:
     Position pos;
     int m_id;
+    bool failed;
     std::ofstream log;
     std::ifstream fenfile;
 };

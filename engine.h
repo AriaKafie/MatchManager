@@ -4,11 +4,12 @@
 
 #include <string>
 #include <windows.h>
+#include <fstream>
 
 class Engine
 {
 public:
-    Engine(const std::string &path, int thinktime);
+    Engine(const std::string &path, int thinktime, int id);
    ~Engine() { kill(); }
 
     void write_to_stdin(const std::string& message);
@@ -20,7 +21,10 @@ public:
     int wins;
 
 private:
+    std::ofstream log;
+
     int    m_thinktime;
+    int    m_id;
     HANDLE m_stdin;
     HANDLE m_stdout;
 

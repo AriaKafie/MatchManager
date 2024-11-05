@@ -7,35 +7,21 @@
 #include <thread>
 #include <sstream>
 
-static std::string strip(const std::string& input)
-{
-    size_t first = input.find_first_not_of(" \t\n\r\f\v");
-
-    if (first == std::string::npos)
-        return "";
-
-    size_t last = input.find_last_not_of(" \t\n\r\f\v");
-    return input.substr(first, last - first + 1);
-}
-
 std::string Engine::best_move()
 {
     write_to_stdin("go movetime " + std::to_string(m_thinktime) + "\n");
-
     std::this_thread::sleep_for(std::chrono::milliseconds(m_thinktime));
 
-    for (std::string std_out;; std_out = read_stdout())
-    {
-        if (size_t s = std_out.rfind("bestmove"); s != std::string::npos)
-        {
-            std::istringstream is(std_out.substr(s));
-            std::string token;
+    std::string std_out, token;
 
-            is >> token >> token;
+    for (std_out = read_stdout();
+         std_out.find("bestmove") == std::string::npos || std_out.find('\n', std_out.rfind("bestmove")) == std::string::npos;
+         std_out += read_stdout())
+    {}
 
-            return strip(token);
-        }
-    }
+    std::istringstream is(std_out.substr(std_out.rfind("bestmove")));
+    is >> token >> token;
+    return token;
 }
 
 void Engine::write_to_stdin(const std::string& message)
@@ -56,13 +42,14 @@ std::string Engine::read_stdout()
 
     buffer[read] = '\0';
 
-    return strip(std::string(buffer));
+    return buffer;
 }
 
-Engine::Engine(const std::string &path, int thinktime) : m_stdin    (NULL),
-                                                         m_stdout   (NULL),
-                                                         m_thinktime(thinktime),
-                                                         wins       (0)
+Engine::Engine(const std::string &path, int thinktime, int id) : m_stdin    (NULL),
+                                                                 m_stdout   (NULL),
+                                                                 m_thinktime(thinktime),
+                                                                 wins       (0),
+                                                                 m_id       (id)
 {
     std::string relative_path = path.find('\\') == std::string::npos ? path : path.substr(path.rfind('\\') + 1);
     m_name = relative_path.substr(0, relative_path.find(".exe"));

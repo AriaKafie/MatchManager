@@ -35,7 +35,7 @@ void run_match(Match *match) {
 }
 
 void Match::run_games()
-{
+{    
     std::vector<std::string> fens;
     for (std::string fen; std::getline(fenfile, fen); fens.push_back(fen));
 
@@ -50,14 +50,16 @@ void Match::run_games()
         printf("Match %d: %s: %d %s: %d draws: %d game: %d/%d\n",
                m_id, e1.name().c_str(), e1.wins, e2.name().c_str(), e2.wins, draws, i + 1, fens.size());
 
-        log << "\n" << fen << std::endl;
-
         pos.set(fen);
 
         Color e1_color = pos.side_to_move(), e2_color = !e1_color;
 
-        e1.write_to_stdin("ucinewgame\nposition fen " + fen + "\n");
-        e2.write_to_stdin("ucinewgame\nposition fen " + fen + "\n");
+        std::string game_string = "position fen " + fen + " ";
+
+        e1.write_to_stdin("ucinewgame\n" + game_string + "\n");
+        e2.write_to_stdin("ucinewgame\n" + game_string + "\n");
+
+        game_string += "moves ";
 
         while (!stop)
         {
@@ -68,30 +70,36 @@ void Match::run_games()
 
             if (best_move == NULLMOVE)
             {
-                log << pos.to_string() << std::endl << engine.name() << ": " << movestr << " <- Invalid" << std::endl;
-                return;
+                log << game_string << std::endl
+                    << pos.to_string() << std::endl 
+                    << engine.name() << ": " << movestr << " <- Invalid" << std::endl;
+
+                failed = true;
+                break;
             }
 
-            log << movestr << " ";
+            game_string += movestr + " ";
 
-            e1.write_to_stdin("position fen " + pos.fen() + " moves " + movestr + "\n");
-            e2.write_to_stdin("position fen " + pos.fen() + " moves " + movestr + "\n");
+            e1.write_to_stdin(game_string + "\n");
+            e2.write_to_stdin(game_string + "\n");
 
             pos.do_move(best_move);
 
             if (GameState g = pos.game_state(); g != ONGOING)
             {
-                if (g == MATE) engine.wins++;
-                else           draws++;
+                if (g == MATE)
+                    engine.wins++;
+                else
+                    draws++;
 
-                log << "\n"
-                    << e1.name() << ": " << e1.wins << " " << e2.name() << ": " << e2.wins << " draws: " << draws << std::endl;
+                log << game_string << std::endl
+                    << e1.name() << ": " << e1.wins << " " << e2.name() << ": " << e2.wins << " draws: " << draws << "\n" << std::endl;
 
                 break;
             }
         }
 
-        if (stop) return;
+        if (stop || failed) break;
     }
 
     std::cout << "Match " << m_id << " done" << std::endl;
@@ -106,9 +114,7 @@ int main(int argc, char **argv)
     std::string tokens, token;
     for (int i = 1; i < argc; tokens += std::string(argv[i++]) + " ");
 
-    std::istringstream args(tokens);
-
-    while (args >> token)
+    for (std::istringstream args(tokens); args >> token;)
     {
         if (token.find("-time") != std::string::npos)
         {
@@ -147,15 +153,15 @@ int main(int argc, char **argv)
     std::vector<Match*> matches;
     std::vector<std::thread> thread_pool;
 
+    std::thread t([]() { await_stop(); });
+    t.detach();
+
     for (int id = 0; id < threads; id++)
     {
         Match* m = new Match(path_1, path_2, time, id, fenpath);
         matches.push_back(m);
         thread_pool.emplace_back([m]() { run_match(m); });
     }
-
-    std::thread t([]() { await_stop(); });
-    t.detach();
 
     for (std::thread &thread : thread_pool)
         thread.join();
@@ -183,6 +189,5 @@ int main(int argc, char **argv)
     printf("| %-16s|%6d |%8.2f%% |\n", name_1.c_str(), e1_wins, e1_winrate * 100);
     printf("| %-16s|%6d |%8.2f%% |\n", name_2.c_str(), e2_wins, e2_winrate * 100);
     printf("| Draws           |%6d |          |\n", draws);
-    printf("| Decisive        |%6d |          |\n", decisive);
     printf("| Total           |%6d |          |\n+-----------------+-------+----------+\n", total);
 }
