@@ -38,7 +38,9 @@ public:
 
     bool kingside_rights  (Color Perspective) const { return state_info.castling_rights & (Perspective == WHITE ? 0b1000 : 0b0010); }
     bool queenside_rights (Color Perspective) const { return state_info.castling_rights & (Perspective == WHITE ? 0b0100 : 0b0001); }
+
     bool white_to_move() const { return state_info.side_to_move == WHITE; }
+    bool black_to_move() const { return state_info.side_to_move == BLACK; }
 
     Color side_to_move() const { return state_info.side_to_move; }
 

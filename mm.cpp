@@ -68,8 +68,9 @@ void Match::run_games()
 
             if (best_move == NULLMOVE)
             {
-                log << game_string << std::endl
-                    << pos.to_string() << std::endl 
+                log << uci_to_pgn(game_string) << std::endl
+                    << game_string             << std::endl
+                    << pos.to_string()         << std::endl 
                     << engine.name() << ": " << movestr << " <- Invalid" << std::endl;
 
                 failed = true;
@@ -90,7 +91,8 @@ void Match::run_games()
                 else
                     draws++;
 
-                log << game_string << std::endl
+                log << uci_to_pgn(game_string) << std::endl
+                    << game_string             << std::endl
                     << e1.name() << ": " << e1.wins << " " << e2.name() << ": " << e2.wins << " Draws: " << draws << "\n" << std::endl;
 
                 break;
@@ -114,21 +116,21 @@ int main(int argc, char **argv)
 
     for (std::istringstream args(tokens); args >> token;)
     {
-        if (token.find("-time") != std::string::npos)
+        if (token.find("-time") == 0)
         {
             if (token == "-time")
                 args >> time;
             else
                 time = std::stoi(token.substr(std::string("-time").size()));
         }
-        else if (token.find("-thread") != std::string::npos)
+        else if (token.find("-thread") == 0)
         {
             if (token == "-thread")
                 args >> threads;
             else
                 threads = std::stoi(token.substr(std::string("-thread").size()));
         }
-        else if (token.find("-fen") != std::string::npos)
+        else if (token.find("-fen") == 0)
         {
             if (token == "-fen")
                 args >> fenpath;
