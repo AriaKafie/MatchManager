@@ -19,6 +19,9 @@ public:
         : e1(path_1, time, id),
           e2(path_2, time, id), m_id(id), draws(0), failed(false)
     {
+        e1.write_to_stdin("uci\nisready\n");
+        e2.write_to_stdin("uci\nisready\n");
+
         log.open(std::string("logs\\")+e1.name()+"_"+e2.name()+"_"+std::to_string(time)+"_id"+std::to_string(m_id)+".txt");
         fenfile.open(fenpath);
     }
@@ -68,7 +71,7 @@ inline std::string Match::uci_to_pgn(const std::string& uci)
     pgn += "[Black \"" + (p.white_to_move() ? e2.name() : e1.name()) + "\"]\n";
     pgn += "[FEN \"" + fen.substr(0, fen.size() - 1) + "\"]\n";
 
-    for (int movenum = 1; is >> token;)
+    for (int ply = 0, movenum = 1; is >> token; ply++)
     {
         Move move = uci_to_move(token, p);
 
@@ -79,7 +82,7 @@ inline std::string Match::uci_to_pgn(const std::string& uci)
         }
         else
         {
-            if (movenum == 1)
+            if (ply == 0)
                 pgn += "1... " + move_to_san(move, p) + " ";
             else
                 pgn += move_to_san(move, p) + " ";
