@@ -159,7 +159,7 @@ int main(int argc, char **argv)
 
     for (int id = 0; id < threads; id++)
     {
-        Match* m = new Match(path_1, path_2, time, id, fenpath);
+        Match *m = new Match(path_1, path_2, time, id, fenpath);
         matches.push_back(m);
         thread_pool.emplace_back([m]() { run_match(m); });
     }

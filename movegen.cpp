@@ -4,7 +4,7 @@
 #include "types.h"
 
 template<MoveType Type, Direction D>
-Move* make_pawn_moves(Move* list, Bitboard attacks)
+Move *make_pawn_moves(Move *list, Bitboard attacks)
 {
     if constexpr (Type == NORMAL)
     {
@@ -29,7 +29,7 @@ Move* make_pawn_moves(Move* list, Bitboard attacks)
     return list;
 }
 
-Move* make_moves(Move* list, Square from, Bitboard to)
+Move *make_moves(Move *list, Square from, Bitboard to)
 {
     for (;to; clear_lsb(to))
         *list++ = make_move(from, lsb(to));

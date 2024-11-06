@@ -57,10 +57,9 @@ GameState Position::game_state()
     if (state_info.halfmove_clock >= 100)
         return DRAW;
 
-    uint64_t key = hash();
-    for (int i = history.size() - 2, occurrences = 1; i >= 0 ; i--)
+    for (int i = history.size() - 2, occurrences = 1; i >= 0; i--)
     {
-        if (history[i] == key) occurrences++;
+        if (history[i] == history.back()) occurrences++;
 
         if (occurrences == 3) return DRAW;
     }       
