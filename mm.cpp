@@ -92,7 +92,10 @@ void Match::run_games()
                     draws++;
 
                 log << uci_to_pgn(game_string) << std::endl
-                    << game_string             << std::endl
+                    << game_string << (g == MATE       ? "Checkmate"
+                                     : g == STALEMATE  ? "Stalemate"
+                                     : g == REPETITION ? "Repetition"
+                                     : g == FIFTY_MOVE ? "Fifty-move rule" : "?") << std::endl
                     << e1.name() << ": " << e1.wins << " " << e2.name() << ": " << e2.wins << " Draws: " << draws << "\n" << std::endl;
 
                 break;

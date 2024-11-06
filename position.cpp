@@ -55,13 +55,13 @@ void Position::init()
 GameState Position::game_state()
 {
     if (state_info.halfmove_clock >= 100)
-        return DRAW;
+        return FIFTY_MOVE;
 
     for (int i = history.size() - 2, occurrences = 1; i >= 0; i--)
     {
         if (history[i] == history.back()) occurrences++;
 
-        if (occurrences == 3) return DRAW;
+        if (occurrences == 3) return REPETITION;
     }       
     
     if (Move list[MAX_MOVES], *end = get_moves(list); list == end)
@@ -74,7 +74,7 @@ GameState Position::game_state()
                           | bishop_attacks(ksq, occupied()) & (bb(make_piece(them, QUEEN)) | bb(make_piece(them, BISHOP)))
                           | rook_attacks(ksq, occupied())   & (bb(make_piece(them, QUEEN)) | bb(make_piece(them, ROOK)));
 
-        return checkers ? MATE : DRAW;
+        return checkers ? MATE : STALEMATE;
     }
 
     return ONGOING;
