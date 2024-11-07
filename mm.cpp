@@ -105,6 +105,9 @@ void Match::run_games()
         if (stop || failed) break;
     }
 
+    e1.kill();
+    e2.kill();
+
     std::cout << "Match " << m_id << (failed ? ": Engine error" : ": Done") << std::endl;
 }
 
