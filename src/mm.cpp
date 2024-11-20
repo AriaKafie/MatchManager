@@ -58,6 +58,7 @@ void Match::run_games()
         e2.write_to_stdin("ucinewgame\n" + game_string + "\n");
 
         game_string += "moves ";
+        log << game_string;
 
         while (!stop)
         {
@@ -68,8 +69,8 @@ void Match::run_games()
 
             if (best_move == NULLMOVE)
             {
-                log << uci_to_pgn(game_string) << std::endl
-                    << game_string             << std::endl
+                log                            << std::endl
+                    << uci_to_pgn(game_string) << std::endl
                     << pos.to_string()         << std::endl 
                     << engine.name() << ": " << movestr << " <- Invalid" << std::endl;
 
@@ -78,6 +79,7 @@ void Match::run_games()
             }
 
             game_string += movestr + " ";
+            log << movestr << " ";
 
             e1.write_to_stdin(game_string + "\n");
             e2.write_to_stdin(game_string + "\n");
@@ -91,11 +93,12 @@ void Match::run_games()
                 else
                     draws++;
 
-                log << uci_to_pgn(game_string) << std::endl
-                    << game_string << (g == MATE       ? "Checkmate"
-                                     : g == STALEMATE  ? "Stalemate"
-                                     : g == REPETITION ? "Repetition"
-                                     : g == FIFTY_MOVE ? "Fifty-move rule" : "?") << std::endl
+                log                            << std::endl
+                    << uci_to_pgn(game_string) << std::endl
+                    << (g == MATE       ? "Checkmate"
+                      : g == STALEMATE  ? "Stalemate"
+                      : g == REPETITION ? "Repetition"
+                      : g == FIFTY_MOVE ? "Fifty-move rule" : "?") << std::endl
                     << e1.name() << ": " << e1.wins << " " << e2.name() << ": " << e2.wins << " Draws: " << draws << "\n" << std::endl;
 
                 break;
