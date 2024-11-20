@@ -116,6 +116,9 @@ void Match::run_games()
 
 int main(int argc, char **argv)
 {
+    Bitboards::init();
+    Position::init();
+
     std::string name_1, name_2, fenpath = "lc01k.txt";
     int time    = DEFAULT_TIME;
     int threads = DEFAULT_THREADS;
@@ -155,9 +158,6 @@ int main(int argc, char **argv)
 
     std::string path_1 = std::string("engines\\") + name_1 + ".exe",
                 path_2 = std::string("engines\\") + name_2 + ".exe";
-
-    Bitboards::init();
-    Position::init();
 
     std::vector<Match*> matches;
     std::vector<std::thread> thread_pool;

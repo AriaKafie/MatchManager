@@ -15,9 +15,12 @@
 class Match
 {
 public:
-    Match(std::string path_1, std::string path_2, int time, int id, std::string fenpath)
-        : e1(path_1, time, id),
-          e2(path_2, time, id), m_id(id), draws(0), failed(false)
+    Match(std::string path_1,
+          std::string path_2,
+          int         time,
+          int         id, 
+          std::string fenpath) : e1(path_1, time, id),
+                                 e2(path_2, time, id), m_id(id), draws(0), failed(false)
     {
         e1.write_to_stdin("uci\nisready\n");
         e2.write_to_stdin("uci\nisready\n");

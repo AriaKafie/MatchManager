@@ -14,14 +14,7 @@ constexpr std::string_view piece_to_char = "  PNBRQK  pnbrqk";
 
 namespace Zobrist
 {
-    // Here, Zobrist is simply for detecting repetitions, and we don't 
-    // consider enpassant when calculating the key. This allows us to err on 
-    // the side of detecting repetitions too soon, and avoid the risk of
-    // prompting naive engines for a move when they think the position is
-    // drawn before it actually is, i.e. when seemingly identical positions
-    // should produce different Zobrist keys, not because the enpassant
-    // square is different, but because the effective enpassant target is.
-
+    static uint64_t enpassant[SQUARE_NB];
     static uint64_t Side = 0xeeb3b2fe864d41e5ull;
     static uint64_t hash[B_KING + 1][SQUARE_NB];
     static uint64_t castling[1 << 4];
@@ -34,7 +27,8 @@ uint64_t Position::hash() const
     for (Square sq = H1; sq <= A8; sq++)
         key ^= Zobrist::hash[piece_on(sq)][sq];
     
-    return key ^ Zobrist::castling[state_info.castling_rights];
+    return key ^ Zobrist::castling[state_info.castling_rights]
+               ^ Zobrist::enpassant[state_info.ep_sq];
 }
 
 void Position::init()
@@ -48,20 +42,26 @@ void Position::init()
             Zobrist::hash[pc][sq] = rng();
     }
 
+    for (Square s = H1; s <= A8; Zobrist::enpassant[s++] = rng());
+
     for (uint8_t castling_rights = 0; castling_rights <= 0b1111; castling_rights++)
         Zobrist::castling[castling_rights] = rng();
 }
+
+
 
 GameState Position::game_state()
 {
     if (state_info.halfmove_clock >= 100)
         return FIFTY_MOVE;
 
-    for (int i = history.size() - 2, occurrences = 1; i >= 0; i--)
+    for (int i = 0, occurrences = 0; i < history.size(); i++)
     {
-        if (history[i] == history.back()) occurrences++;
+        if (history[i] == history.back())
+            occurrences++;
 
-        if (occurrences == 3) return REPETITION;
+        if (occurrences == 3)
+            return REPETITION;
     }       
     
     if (Move list[MAX_MOVES], *end = get_moves(list); list == end)
@@ -89,19 +89,24 @@ void Position::do_move(Move m)
     Piece Queen = make_piece(us, QUEEN);
     Piece King  = make_piece(us, KING);
 
-    Direction Up  = us == WHITE ? NORTH : SOUTH;
-    Direction Up2 = Up * 2;
-
-    Square from = from_sq(m);
-    Square to   = to_sq(m);
+    Square from = from_sq(m), to = to_sq(m);
 
     if (piece_type_on(from) == PAWN || piece_on(to))
         state_info.halfmove_clock = 0;
     else
         state_info.halfmove_clock++;
 
-    state_info.ep_sq = (from + Up) * !(to - from ^ Up2 | piece_type_on(from) ^ PAWN);
-    state_info.side_to_move ^= 1;
+    state_info.ep_sq = NO_SQ;
+
+    if ((from ^ to) == 16 && piece_type_on(from) == PAWN)
+    {
+        Square potential_ep = to + relative_direction(us, SOUTH);
+
+        if (PawnAttacks[us][potential_ep] & bitboards[make_piece(them, PAWN)])
+            state_info.ep_sq = potential_ep;
+    }
+
+    state_info.side_to_move = !state_info.side_to_move;
 
     Bitboard zero_to = ~square_bb(to);
     Bitboard from_to =  square_bb(from, to);
