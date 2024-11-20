@@ -14,9 +14,16 @@ constexpr std::string_view piece_to_char = "  PNBRQK  pnbrqk";
 
 namespace Zobrist
 {
+    // Here, Zobrist is simply for detecting repetitions, and we don't 
+    // consider enpassant when calculating the key. This allows us to err on 
+    // the side of detecting repetitions too soon, and avoid the risk of
+    // prompting naive engines for a move when they think the position is
+    // drawn before it actually is, i.e. when seemingly identical positions
+    // should produce different Zobrist keys, not because the enpassant
+    // square is different, but because the effective enpassant target is.
+
     static uint64_t Side = 0xeeb3b2fe864d41e5ull;
     static uint64_t hash[B_KING + 1][SQUARE_NB];
-    static uint64_t enpassant[SQUARE_NB];
     static uint64_t castling[1 << 4];
 }
 
@@ -27,15 +34,12 @@ uint64_t Position::hash() const
     for (Square sq = H1; sq <= A8; sq++)
         key ^= Zobrist::hash[piece_on(sq)][sq];
     
-    return key ^ Zobrist::castling[state_info.castling_rights]
-               ^ Zobrist::enpassant[state_info.ep_sq];
+    return key ^ Zobrist::castling[state_info.castling_rights];
 }
 
 void Position::init()
 {
     std::mt19937_64 rng(221564671644);
-
-    memset(Zobrist::hash, 0, sizeof(Zobrist::hash));
 
     for (Piece pc : { W_PAWN, W_KNIGHT, W_BISHOP, W_ROOK, W_QUEEN, W_KING,
                       B_PAWN, B_KNIGHT, B_BISHOP, B_ROOK, B_QUEEN, B_KING })
@@ -46,10 +50,6 @@ void Position::init()
 
     for (uint8_t castling_rights = 0; castling_rights <= 0b1111; castling_rights++)
         Zobrist::castling[castling_rights] = rng();
-
-    Zobrist::enpassant[0] = 0ull;
-
-    for (Square s = G1; s <= A8; Zobrist::enpassant[s++] = rng());
 }
 
 GameState Position::game_state()
