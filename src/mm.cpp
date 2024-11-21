@@ -156,21 +156,20 @@ int main(int argc, char **argv)
         }
     }
 
-    std::string path_1 = std::string("engines\\") + name_1 + ".exe",
-                path_2 = std::string("engines\\") + name_2 + ".exe";
+    std::string path_1 = std::string("engines\\") + name_1 + ".exe";
+    std::string path_2 = std::string("engines\\") + name_2 + ".exe";
 
     std::vector<Match*> matches;
     std::vector<std::thread> thread_pool;
 
     stop = false;
-    std::thread t([]() { await_stop(); });
+    std::thread t(await_stop);
     t.detach();
 
     for (int id = 0; id < threads; id++)
     {
-        Match *m = new Match(path_1, path_2, time, id, fenpath);
-        matches.push_back(m);
-        thread_pool.emplace_back([m]() { run_match(m); });
+        matches.push_back(new Match(path_1, path_2, time, id, fenpath));
+        thread_pool.emplace_back(run_match, matches.back());
     }
 
     for (std::thread &thread : thread_pool)
