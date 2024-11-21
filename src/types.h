@@ -62,6 +62,10 @@ enum
     NORTH_WEST = NORTH + WEST
 };
 
+constexpr Square relative_square(Color c, Square sq) {
+    return c == WHITE ? sq : sq ^ 63;
+}
+
 constexpr Direction relative_direction(Color c, Direction d) {
     return c == WHITE ? d : -d;
 }
