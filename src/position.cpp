@@ -44,11 +44,8 @@ void Position::init()
 
     for (Square s = H1; s <= A8; Zobrist::enpassant[s++] = rng());
 
-    for (uint8_t castling_rights = 0; castling_rights <= 0b1111; castling_rights++)
-        Zobrist::castling[castling_rights] = rng();
+    for (uint8_t rights = 0; rights <= 0xf; Zobrist::castling[rights++] = rng());
 }
-
-
 
 GameState Position::game_state()
 {
@@ -67,6 +64,7 @@ GameState Position::game_state()
     if (Move list[MAX_MOVES], *end = get_moves(list); list == end)
     {
         Color us = side_to_move(), them = !us;
+
         Square ksq = lsb(bb(make_piece(us, KING)));
 
         Bitboard checkers = PawnAttacks[us][ksq]            &  bb(make_piece(them, PAWN))
@@ -91,14 +89,14 @@ void Position::do_move(Move m)
 
     Square from = from_sq(m), to = to_sq(m);
 
-    if (piece_type_on(from) == PAWN || piece_on(to))
+    if (piece_on(from) == Pawn || piece_on(to))
         state_info.halfmove_clock = 0;
     else
         state_info.halfmove_clock++;
 
     state_info.ep_sq = NO_SQ;
 
-    if ((from ^ to) == 16 && piece_type_on(from) == PAWN)
+    if ((from ^ to) == 16 && piece_on(from) == Pawn)
     {
         Square potential_ep = to + relative_direction(us, SOUTH);
 

@@ -12,12 +12,11 @@ constexpr int MAX_MOVES = 128;
 
 enum GameState
 {
+    ONGOING,
     MATE,
     STALEMATE,
     REPETITION,
     FIFTY_MOVE,
-    ONGOING,
-    OUTCOME_NB = 4
 };
 
 struct StateInfo

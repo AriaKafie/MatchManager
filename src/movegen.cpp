@@ -21,8 +21,8 @@ Move *make_pawn_moves(Move *list, Bitboard attacks)
             Square to = lsb(attacks);
             *list++ = make_move<KNIGHT_PROMOTION>(to - D, to);
             *list++ = make_move<BISHOP_PROMOTION>(to - D, to);
-            *list++ = make_move<ROOK_PROMOTION>(to - D, to);
-            *list++ = make_move<QUEEN_PROMOTION>(to - D, to);
+            *list++ = make_move<ROOK_PROMOTION  >(to - D, to);
+            *list++ = make_move<QUEEN_PROMOTION >(to - D, to);
         }
     }
 
@@ -123,7 +123,6 @@ Move *generate_moves(const Position &pos, Move *list)
         Square from = lsb(b);
         list = make_moves(list, from, knight_attacks(from) & checkmask);
     }
-
     for (Bitboard b = pos.bb(FriendlyBishop) | pos.bb(FriendlyQueen); b; clear_lsb(b))
     {
         Square from = lsb(b);
