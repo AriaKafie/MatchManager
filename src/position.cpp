@@ -87,7 +87,7 @@ void Position::do_move(Move m)
     Piece Queen = make_piece(us, QUEEN);
     Piece King  = make_piece(us, KING);
 
-    Square from = from_sq(m), to = to_sq(m);
+    Square from = m.from_sq(), to = m.to_sq();
 
     if (piece_on(from) == Pawn || piece_on(to))
         state_info.halfmove_clock = 0;
@@ -109,7 +109,7 @@ void Position::do_move(Move m)
     Bitboard zero_to = ~square_bb(to);
     Bitboard from_to =  square_bb(from, to);
 
-    switch (type_of(m))
+    switch (m.type_of())
     {
     case NORMAL:
         bitboards[board[to]] &= zero_to;
@@ -126,7 +126,7 @@ void Position::do_move(Move m)
         return;
     case PROMOTION:
     {
-        Piece promotion = make_piece(us, promotion_type(m));
+        Piece promotion = make_piece(us, m.promotion_type());
         
         bitboards[board[to]] &= zero_to;
         bitboards[them] &= zero_to;
@@ -144,11 +144,11 @@ void Position::do_move(Move m)
     }
     case CASTLING:
     {
-        Move rook_move = to == G1 ? make_move(H1, F1)
-                       : to == C1 ? make_move(A1, D1)
-                       : to == G8 ? make_move(H8, F8) : make_move(A8, D8);
+        Move rook_move = to == G1 ? Move(H1, F1)
+                       : to == C1 ? Move(A1, D1)
+                       : to == G8 ? Move(H8, F8) : Move(A8, D8);
 
-        Square rook_from = from_sq(rook_move), rook_to = to_sq(rook_move);        
+        Square rook_from = rook_move.from_sq(), rook_to = rook_move.to_sq();
         Bitboard rook_from_to = square_bb(rook_from, rook_to);
 
         bitboards[King] ^= from_to;

@@ -5,15 +5,12 @@
 #include <stdint.h>
 
 typedef uint64_t Bitboard;
-typedef uint16_t Move;
 typedef uint16_t MoveType;
 typedef uint8_t  Piece;
 typedef uint8_t  PieceType;
 typedef uint8_t  Color;
 typedef int8_t   Direction;
 typedef int8_t   Square;
-
-constexpr Move NULLMOVE = 0;
 
 enum { WHITE, BLACK, COLOR_NB = 2 };
 
@@ -62,6 +59,34 @@ enum
     NORTH_WEST = NORTH + WEST
 };
 
+class Move
+{
+public:
+    Move() = default;
+    constexpr Move(Square from, Square to) : data((from << 6) + to) {}
+    constexpr Move(uint16_t d) : data(d) {}
+
+    static Move null() { return Move(0); }
+
+    template<MoveType T>
+    static constexpr Move make(Square from, Square to) {
+        return Move(T + (from << 6) + to);
+    }
+
+    constexpr Square from_sq() const { return (data >> 6) & 0x3f; }
+    constexpr Square to_sq() const { return data & 0x3f; }
+
+    constexpr MoveType type_of() const { return data & 0x3000; }
+
+    constexpr PieceType promotion_type() const { return (data >> 14) + KNIGHT; }
+
+    constexpr bool operator==(Move m) const { return data == m.data; }
+    constexpr bool operator!=(Move m) const { return data != m.data; }
+
+private:
+    uint16_t data;
+};
+
 constexpr Square relative_square(Color c, Square sq) {
     return c == WHITE ? sq : sq ^ 63;
 }
@@ -72,31 +97,6 @@ constexpr Direction relative_direction(Color c, Direction d) {
 
 constexpr PieceType type_of(Piece p) {
     return p & 7;
-}
-
-inline Move make_move(Square from, Square to) {
-    return (from << 6) + to;
-}
-
-template<MoveType T>
-constexpr Move make_move(Square from, Square to) {
-    return T + (from << 6) + to;
-}
-
-inline Square from_sq(Move m) {
-    return (m >> 6) & 0x3f;
-}
-
-inline Square to_sq(Move m) {
-    return m & 0x3f;
-}
-
-inline MoveType type_of(Move m) {
-    return m & 0x3000;
-}
-
-inline PieceType promotion_type(Move m) {
-    return (m >> 14) + KNIGHT;
 }
 
 constexpr Piece make_piece(Color c, PieceType pt) {

@@ -79,7 +79,7 @@ void Match::run_games()
             std::string movestr = engine.best_move();
             Move move = pos.uci_to_move(movestr);
 
-            if (move == NULLMOVE)
+            if (move == Move::null())
             {
                 log                            << std::endl
                     << uci_to_pgn(game_string) << std::endl

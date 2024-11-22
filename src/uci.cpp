@@ -6,16 +6,16 @@ Move Position::uci_to_move(const std::string& uci) const
     for (Move list[MAX_MOVES], *m = list, *end = get_moves(list); m != end; m++)
         if (move_to_uci(*m) == uci) return *m;
 
-    return NULLMOVE;
+    return Move::null();
 }
 
 std::string move_to_san(Move m, Position& pos)
 {
     char pt2c[] = "  PNBRQK";
 
-    Square from = from_sq(m), to = to_sq(m);
+    Square from = m.from_sq(), to = m.to_sq();
     PieceType pt = pos.piece_type_on(from);
-    bool capture = pos.piece_on(to) || type_of(m) == ENPASSANT;
+    bool capture = pos.piece_on(to) || m.type_of() == ENPASSANT;
 
     std::string san;
 
@@ -26,7 +26,7 @@ std::string move_to_san(Move m, Position& pos)
         else
             san = square_to_uci(to);
 
-        return type_of(m) == PROMOTION ? san + "=" + pt2c[promotion_type(m)] : san;
+        return m.type_of() == PROMOTION ? san + "=" + pt2c[m.promotion_type()] : san;
     }
 
     if (capture)

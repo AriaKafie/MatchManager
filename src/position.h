@@ -36,7 +36,7 @@ public:
 
     Move *get_moves(Move *list) const;
 
-    void set(const std::string& fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 ");
+    void set(const std::string& fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     void do_move(Move m);
     std::string fen() const;
     std::string to_string() const;
@@ -66,13 +66,13 @@ public:
     Square ep_sq() const { return state_info.ep_sq; }
     
 private:
-    void update_castling_rights(Color just_moved);
-
     Bitboard bitboards[16];
     Piece board[SQUARE_NB];
 
     StateInfo state_info;
     std::vector<uint64_t> history;
+
+    void update_castling_rights(Color just_moved);
 };
 
 #endif
