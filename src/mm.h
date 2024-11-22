@@ -20,7 +20,7 @@ public:
           int         time,
           int         id, 
           std::string fenpath) : e1(path_1, time, id),
-                                 e2(path_2, time, id), m_id(id), draws(0), failed(false)
+                                 e2(path_2, time, id), m_id(id), failed(false), draws(0)
     {
         e1.write_to_stdin("uci\nisready\n");
         e2.write_to_stdin("uci\nisready\n");
@@ -33,9 +33,9 @@ public:
 
     void run_games();
 
+    int draws;
     Engine e1;
     Engine e2;
-    int draws;
 
 private:
     std::string uci_to_pgn(const std::string& uci);
@@ -76,7 +76,7 @@ inline std::string Match::uci_to_pgn(const std::string& uci)
 
     for (int ply = 0, movenum = 1; is >> token; ply++)
     {
-        Move move = uci_to_move(token, p);
+        Move move = p.uci_to_move(token);
 
         if (p.white_to_move())
         {

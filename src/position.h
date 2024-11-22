@@ -10,7 +10,15 @@
 
 constexpr int MAX_MOVES = 128;
 
-enum GameState { ONGOING, MATE, STALEMATE, REPETITION, FIFTY_MOVE };
+enum GameState
+{
+    MATE,
+    STALEMATE,
+    REPETITION,
+    FIFTY_MOVE,
+    ONGOING,
+    OUTCOME_NB = 4
+};
 
 struct StateInfo
 {
@@ -27,7 +35,7 @@ public:
 
     static void init();
 
-    Move *get_moves(Move *list);
+    Move *get_moves(Move *list) const;
 
     void set(const std::string& fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 ");
     void do_move(Move m);
@@ -43,6 +51,8 @@ public:
     bool black_to_move() const { return state_info.side_to_move == BLACK; }
 
     Color side_to_move() const { return state_info.side_to_move; }
+
+    Move uci_to_move(const std::string& uci) const;
 
     Piece piece_on(Square sq) const { return board[sq]; }
 

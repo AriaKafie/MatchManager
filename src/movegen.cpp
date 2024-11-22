@@ -156,7 +156,7 @@ Move *generate_moves(const Position &pos, Move *list)
     return list;
 }
 
-Move *Position::get_moves(Move *list)
+Move *Position::get_moves(Move *list) const
 {
     return white_to_move() ? generate_moves<WHITE>(*this, list)
                            : generate_moves<BLACK>(*this, list);

@@ -14,9 +14,21 @@
 #include "bitboard.h"
 #include "engine.h"
 #include "position.h"
-#include "uci.h"
 
 static volatile bool stop;
+
+std::string time_()
+{
+    std::time_t now_c = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+
+    std::tm now_tm;
+    localtime_s(&now_tm, &now_c);
+
+    std::stringstream ss;
+    ss << std::put_time(&now_tm, "%H:%M:%S");
+
+    return ss.str();
+}
 
 void await_stop()
 {
@@ -39,14 +51,14 @@ void Match::run_games()
 
     std::random_device rd;
     std::mt19937 g(rd());
-
     std::shuffle(fens.begin(), fens.end(), g);
 
     for (int i = 0; i < fens.size(); i++)
     {
         std::string fen = fens[i];
-        printf("Match %d: %s: %d %s: %d Draws: %d Games: %d/%d\n",
-               m_id, e1.name().c_str(), e1.wins, e2.name().c_str(), e2.wins, draws, i, fens.size());
+
+        printf("%s: Match %d: %s: %d %s: %d Draws: %d Games: %d/%d\n",
+               time_().c_str(), m_id, e1.name().c_str(), e1.wins, e2.name().c_str(), e2.wins, draws, i, fens.size());
 
         pos.set(fen);
 
@@ -65,9 +77,9 @@ void Match::run_games()
             Engine &engine = pos.side_to_move() == e1_color ? e1 : e2;
 
             std::string movestr = engine.best_move();
-            Move best_move = uci_to_move(movestr, pos);
+            Move move = pos.uci_to_move(movestr);
 
-            if (best_move == NULLMOVE)
+            if (move == NULLMOVE)
             {
                 log                            << std::endl
                     << uci_to_pgn(game_string) << std::endl
@@ -84,7 +96,7 @@ void Match::run_games()
             e1.write_to_stdin(game_string + "\n");
             e2.write_to_stdin(game_string + "\n");
 
-            pos.do_move(best_move);
+            pos.do_move(move);
 
             if (GameState g = pos.game_state(); g != ONGOING)
             {

@@ -21,7 +21,6 @@ inline std::string move_to_uci(Move m)
                                    : square_to_uci(from_sq(m)) + square_to_uci(to_sq(m));
 }
 
-Move uci_to_move(const std::string& uci, Position& pos);
 std::string move_to_san(Move m, Position& pos);
 
 #endif
