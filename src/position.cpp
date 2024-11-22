@@ -67,10 +67,10 @@ GameState Position::game_state()
 
         Square ksq = lsb(bb(make_piece(us, KING)));
 
-        Bitboard checkers = PawnAttacks[us][ksq]            &  bb(make_piece(them, PAWN))
-                          | knight_attacks(ksq)             &  bb(make_piece(them, KNIGHT))
-                          | bishop_attacks(ksq, occupied()) & (bb(make_piece(them, QUEEN)) | bb(make_piece(them, BISHOP)))
-                          | rook_attacks(ksq, occupied())   & (bb(make_piece(them, QUEEN)) | bb(make_piece(them, ROOK)));
+        Bitboard checkers = PawnAttacks[us][ksq]                &  bb(make_piece(them, PAWN))
+                          | knight_attacks(ksq)                 &  bb(make_piece(them, KNIGHT))
+                          | attacks_bb(BISHOP, ksq, occupied()) & (bb(make_piece(them, QUEEN)) | bb(make_piece(them, BISHOP)))
+                          | attacks_bb(ROOK,   ksq, occupied()) & (bb(make_piece(them, QUEEN)) | bb(make_piece(them, ROOK)));
 
         return checkers ? MATE : STALEMATE;
     }

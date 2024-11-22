@@ -3,19 +3,22 @@
 
 #include <algorithm>
 
-void init_magics();
-
-static Bitboard attacks_bb(PieceType pt, Square sq, Bitboard occupied)
+Bitboard attacks_bb(PieceType pt, Square sq, Bitboard occupied)
 {
-    Direction rook_directions[4] = { NORTH, EAST, SOUTH, WEST };
+    Bitboard  attacks              = 0;
+    Direction rook_directions[4]   = { NORTH, EAST, SOUTH, WEST };
     Direction bishop_directions[4] = { NORTH_EAST, SOUTH_EAST, SOUTH_WEST, NORTH_WEST };
 
-    Bitboard atk = 0;
-
     for (Direction d : pt == ROOK ? rook_directions : bishop_directions)
-        for (Square s = sq; safe_step(s, d) && !(square_bb(s) & occupied); atk |= square_bb(s += d));
+    {
+        Square s = sq;
+        
+        do
+            attacks |= safe_step(s, d);
+        while (safe_step(s, d) && !(square_bb(s += d) & occupied));
+    }
     
-    return atk;
+    return attacks;
 }
 
 void Bitboards::init()
@@ -28,12 +31,10 @@ void Bitboards::init()
             SquareDistance[s1][s2] = std::max(file_distance(s1, s2), rank_distance(s1, s2));
     }
 
-    init_magics();
-
     for (Square s1 = H1; s1 <= A8; s1++)
     {
-        MainDiag[s1] = bishop_attacks(s1, 0) & (mask(s1, NORTH_WEST) | mask(s1, SOUTH_EAST)) | square_bb(s1);
-        AntiDiag[s1] = bishop_attacks(s1, 0) & (mask(s1, NORTH_EAST) | mask(s1, SOUTH_WEST)) | square_bb(s1);
+        MainDiag[s1] = attacks_bb(BISHOP, s1, 0) & (mask(s1, NORTH_WEST) | mask(s1, SOUTH_EAST)) | square_bb(s1);
+        AntiDiag[s1] = attacks_bb(BISHOP, s1, 0) & (mask(s1, NORTH_EAST) | mask(s1, SOUTH_WEST)) | square_bb(s1);
 
         for (Square s2 = H1; s2 <= A8; s2++)
             if (PieceType pt; attacks_bb(pt=BISHOP, s1, 0) & square_bb(s2) || attacks_bb(pt=ROOK, s1, 0) & square_bb(s2))
@@ -82,28 +83,5 @@ void Bitboards::init()
 
         castle_masks[WHITE][pext(w_occ, square_bb(A1, E1, H1, A8, H8))] = w_rights;
         castle_masks[BLACK][pext(b_occ, square_bb(A8, E8, H8, A1, H1))] = b_rights;
-    }
-}
-
-void init_magics()
-{
-    Bitboard *pext = pext_table, *xray = xray_table;
-
-    for (PieceType pt : { BISHOP, ROOK })
-    {
-        int*      base = pt == BISHOP ? bishop_base  : rook_base;
-        Bitboard* mask = pt == BISHOP ? bishop_masks : rook_masks;
-
-        for (Square s = H1; s <= A8; s++)
-        {
-            base[s] = pext - pext_table;
-            mask[s] = attacks_bb(pt, s, 0) & ~((FILE_A | FILE_H) & ~file_bb(s) | (RANK_1 | RANK_8) & ~rank_bb(s));
-
-            for (Bitboard occupied = 0, i = 0; i < 1 << popcount(mask[s]); occupied = generate_occupancy(mask[s], ++i))
-            {
-                *pext++ = attacks_bb(pt, s, occupied);
-                *xray++ = attacks_bb(pt, s, occupied ^ attacks_bb(pt, s, occupied) & occupied);
-            }
-        }
     }
 }

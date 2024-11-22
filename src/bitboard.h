@@ -14,15 +14,6 @@
 
 namespace Bitboards { void init(); }
 
-inline Bitboard pext_table[0x1a480];
-inline Bitboard xray_table[0x1a480];
-
-inline Bitboard bishop_masks[SQUARE_NB];
-inline Bitboard rook_masks[SQUARE_NB];
-
-inline int bishop_base[SQUARE_NB];
-inline int rook_base[SQUARE_NB];
-
 inline Bitboard DoubleCheck[SQUARE_NB];
 inline Bitboard KnightAttacks[SQUARE_NB];
 inline Bitboard KingAttacks[SQUARE_NB];
@@ -180,24 +171,10 @@ inline Bitboard knight_attacks(Square sq) {
     return KnightAttacks[sq];
 }
 
-inline Bitboard bishop_attacks(Square sq, Bitboard occupied) {
-    return pext_table[bishop_base[sq] + pext(occupied, bishop_masks[sq])];
-}
+Bitboard attacks_bb(PieceType pt, Square sq, Bitboard occupied);
 
-inline Bitboard bishop_xray(Square sq, Bitboard occupied) {
-    return xray_table[bishop_base[sq] + pext(occupied, bishop_masks[sq])];
-}
-
-inline Bitboard rook_attacks(Square sq, Bitboard occupied) {
-    return pext_table[rook_base[sq] + pext(occupied, rook_masks[sq])];
-}
-
-inline Bitboard rook_xray(Square sq, Bitboard occupied) {
-    return xray_table[rook_base[sq] + pext(occupied, rook_masks[sq])];
-}
-
-inline Bitboard queen_attacks(Square sq, Bitboard occupied) {
-    return pext_table[bishop_base[sq] + pext(occupied, bishop_masks[sq])] | pext_table[rook_base[sq] + pext(occupied, rook_masks[sq])];
+inline Bitboard xray_bb(PieceType pt, Square sq, Bitboard occupied) {
+    return attacks_bb(pt, sq, occupied ^ attacks_bb(pt, sq, occupied) & occupied);
 }
 
 inline Bitboard king_attacks(Square sq) {
@@ -210,8 +187,8 @@ constexpr Bitboard pawn_attacks(Square sq) {
 }
 
 template<Color C>
-constexpr Bitboard pawn_attacks(Bitboard pawns) {
-
+constexpr Bitboard pawn_attacks(Bitboard pawns)
+{
     if constexpr (C == WHITE) return shift<NORTH_EAST>(pawns) | shift<NORTH_WEST>(pawns);
     else                      return shift<SOUTH_WEST>(pawns) | shift<SOUTH_EAST>(pawns);
 }
@@ -236,10 +213,9 @@ inline int rank_distance(Square a, Square b) {
     return std::abs((a / 8) - (b / 8));
 }
 
-inline Bitboard safe_step(Square s, int step) {
-
+inline Bitboard safe_step(Square s, int step)
+{
     Square to = s + step;
-
     return (is_ok(to) && square_distance(s, to) <= 2) ? square_bb(to) : 0;
 }
 
