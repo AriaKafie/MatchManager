@@ -5,11 +5,11 @@
 
 Bitboard attacks_bb(PieceType pt, Square sq, Bitboard occupied)
 {
-    Bitboard  attacks              = 0;
-    Direction rook_directions[4]   = { NORTH, EAST, SOUTH, WEST };
-    Direction bishop_directions[4] = { NORTH_EAST, SOUTH_EAST, SOUTH_WEST, NORTH_WEST };
+    Bitboard  attacks   = 0;
+    Direction rook[4]   = { NORTH, EAST, SOUTH, WEST };
+    Direction bishop[4] = { NORTH_EAST, SOUTH_EAST, SOUTH_WEST, NORTH_WEST };
 
-    for (Direction d : pt == ROOK ? rook_directions : bishop_directions)
+    for (Direction d : pt == ROOK ? rook : bishop)
     {
         Square s = sq;
         
