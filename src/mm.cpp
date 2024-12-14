@@ -15,8 +15,6 @@
 #include "engine.h"
 #include "position.h"
 
-static volatile bool stop;
-
 std::string time_()
 {
     std::time_t now_c = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
@@ -30,24 +28,25 @@ std::string time_()
     return ss.str();
 }
 
-void await_stop()
+void await_stop(bool *stop)
 {
     std::string in;
     do
         std::getline(std::cin, in);
     while (in != "stop");
 
-    stop = true;
+    *stop = true;
 }
 
-void run_match(Match *match) {
-    match->run_games();
+void run_match(Match *match, bool *stop) {
+    match->run_games(stop);
 }
 
-void Match::run_games()
+void Match::run_games(bool *stop)
 {    
     std::vector<std::string> fens;
     for (std::string fen; std::getline(fenfile, fen); fens.push_back(fen));
+    fenfile.close();
 
     std::random_device rd;
     std::mt19937 g(rd());
@@ -72,12 +71,12 @@ void Match::run_games()
         game_string += "moves ";
         log << game_string;
 
-        while (!stop)
+        while (!*stop)
         {
-            Engine &engine = pos.side_to_move() == e1_color ? e1 : e2;
+            Engine& engine = pos.side_to_move() == e1_color ? e1 : e2;
 
             std::string movestr = engine.best_move();
-            Move move = pos.uci_to_move(movestr);
+            Move        move    = pos.uci_to_move(movestr);
 
             if (move == Move::null())
             {
@@ -117,7 +116,7 @@ void Match::run_games()
             }
         }
 
-        if (stop || failed) break;
+        if (*stop || failed) break;
     }
 
     e1.kill();
@@ -174,14 +173,14 @@ int main(int argc, char **argv)
     std::vector<Match*> matches;
     std::vector<std::thread> thread_pool;
 
-    stop = false;
-    std::thread t(await_stop);
+    bool stop = false;
+    std::thread t(await_stop, &stop);
     t.detach();
 
     for (int id = 0; id < threads; id++)
     {
         matches.push_back(new Match(path_1, path_2, time, id, fenpath));
-        thread_pool.emplace_back(run_match, matches.back());
+        thread_pool.emplace_back(run_match, matches.back(), &stop);
     }
 
     for (std::thread &thread : thread_pool)

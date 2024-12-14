@@ -29,9 +29,9 @@ public:
         fenfile.open(fenpath);
     }
 
-    ~Match() { log.close(); fenfile.close(); }
+    ~Match() { log.close(); }
 
-    void run_games();
+    void run_games(bool *stop);
 
     int draws;
     Engine e1;
@@ -40,9 +40,9 @@ public:
 private:
     std::string uci_to_pgn(const std::string& uci);
 
-    Position pos;
-    int m_id;
-    bool failed;
+    Position      pos;
+    int           m_id;
+    bool          failed;
     std::ofstream log;
     std::ifstream fenfile;
 };

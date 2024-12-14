@@ -42,9 +42,11 @@ void Position::init()
             Zobrist::hash[pc][sq] = rng();
     }
 
-    for (Square s = H1; s <= A8; Zobrist::enpassant[s++] = rng());
+    for (Square s = H1; s <= A8; s++)
+        Zobrist::enpassant[s++] = rng();
 
-    for (uint8_t rights = 0; rights <= 0xf; Zobrist::castling[rights++] = rng());
+    for (int rights = 0; rights <= 0xf; rights++)
+        Zobrist::castling[rights] = rng();
 }
 
 GameState Position::game_state()
