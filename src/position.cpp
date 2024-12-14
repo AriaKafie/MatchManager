@@ -43,7 +43,7 @@ void Position::init()
     }
 
     for (Square s = H1; s <= A8; s++)
-        Zobrist::enpassant[s++] = rng();
+        Zobrist::enpassant[s] = rng();
 
     for (int rights = 0; rights <= 0xf; rights++)
         Zobrist::castling[rights] = rng();
