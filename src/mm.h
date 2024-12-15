@@ -3,6 +3,7 @@
 #define MM_H
 
 #include <fstream>
+#include <random>
 #include <sstream>
 
 #include "engine.h"
@@ -26,25 +27,31 @@ public:
         e2.write_to_stdin("uci\nisready\n");
 
         log.open(std::string("logs\\")+e1.name()+"_"+e2.name()+"_"+std::to_string(time)+"_id"+std::to_string(m_id)+".txt");
-        fenfile.open(fenpath);
+        
+        std::string fen;
+        for (std::ifstream fenfile(fenpath); std::getline(fenfile, fen); fens.push_back(fen));
+
+        std::random_device rd;
+        std::mt19937 g(rd());
+        std::shuffle(fens.begin(), fens.end(), g);
     }
 
     ~Match() { log.close(); }
 
     void run_games(bool *stop);
 
-    int draws;
     Engine e1;
     Engine e2;
+    int    draws;
 
 private:
     std::string uci_to_pgn(const std::string& uci);
 
-    Position      pos;
-    int           m_id;
-    bool          failed;
-    std::ofstream log;
-    std::ifstream fenfile;
+    Position                 pos;
+    int                      m_id;
+    bool                     failed;
+    std::ofstream            log;
+    std::vector<std::string> fens;
 };
 
 inline std::string Match::uci_to_pgn(const std::string& uci)

@@ -6,7 +6,6 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
-#include <random>
 #include <sstream>
 #include <fstream>
 #include <vector>
@@ -33,7 +32,7 @@ void await_stop(bool *stop)
     std::string in;
     do
         std::getline(std::cin, in);
-    while (in != "stop");
+    while (in != "stop" && in != "quit");
 
     *stop = true;
 }
@@ -44,14 +43,6 @@ void run_match(Match *match, bool *stop) {
 
 void Match::run_games(bool *stop)
 {    
-    std::vector<std::string> fens;
-    for (std::string fen; std::getline(fenfile, fen); fens.push_back(fen));
-    fenfile.close();
-
-    std::random_device rd;
-    std::mt19937 g(rd());
-    std::shuffle(fens.begin(), fens.end(), g);
-
     for (int i = 0; i < fens.size(); i++)
     {
         std::string fen = fens[i];
