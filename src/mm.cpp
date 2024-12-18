@@ -1,7 +1,6 @@
 
 #include "mm.h"
 
-#include <algorithm>
 #include <iomanip>
 #include <iostream>
 #include <chrono>

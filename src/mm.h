@@ -2,6 +2,7 @@
 #ifndef MM_H
 #define MM_H
 
+#include <algorithm>
 #include <fstream>
 #include <random>
 #include <sstream>
