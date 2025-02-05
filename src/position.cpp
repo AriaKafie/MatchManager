@@ -99,12 +99,7 @@ void Position::do_move(Move m)
     state_info.ep_sq = NO_SQ;
 
     if ((from ^ to) == 16 && piece_on(from) == Pawn)
-    {
-        Square potential_ep = to + relative_direction(us, SOUTH);
-
-        if (PawnAttacks[us][potential_ep] & bitboards[make_piece(them, PAWN)])
-            state_info.ep_sq = potential_ep;
-    }
+        if (Square potential_ep = to + relative_direction(us, SOUTH); PawnAttacks[us][potential_ep] & bitboards[make_piece(them, PAWN)]) state_info.ep_sq = potential_ep;
 
     state_info.side_to_move = !state_info.side_to_move;
 

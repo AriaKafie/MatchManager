@@ -13,7 +13,7 @@ public:
    ~Engine() { kill(); }
 
     void write_to_stdin(const std::string& message);
-    void kill() { write_to_stdin("stop\nquit\n"); }
+    void kill() { log.close(); write_to_stdin("stop\nquit\n"); }
     std::string read_stdout();
     std::string best_move();
     std::string name() const { return m_name; }

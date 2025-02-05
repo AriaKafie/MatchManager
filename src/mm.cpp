@@ -94,7 +94,7 @@ void Match::run_games(bool *stop)
                 else
                     draws++;
 
-                log                            << std::endl
+                log << std::endl
                     << uci_to_pgn(game_string) << std::endl
                     << (g == MATE       ? "Checkmate"
                       : g == STALEMATE  ? "Stalemate"
