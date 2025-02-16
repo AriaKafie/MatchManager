@@ -115,7 +115,7 @@ void Match::run_games(bool *stop)
     std::cout << "Match " << m_id << (failed ? ": Engine error" : ": Done") << std::endl;
 }
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
     Bitboards::init();
     Position::init();
@@ -125,9 +125,19 @@ int main(int argc, char **argv)
     int threads = DEFAULT_THREADS;
 
     std::string tokens, token;
-    for (int i = 1; i < argc; tokens += std::string(argv[i++]) + " ");
 
-    for (std::istringstream args(tokens); args >> token;)
+    for (int i = 1; i < argc; i++)
+        tokens += std::string(argv[i]) + " ";
+
+    std::istringstream args(tokens);
+
+    if (!(args >> name_1 >> name_2))
+    {
+        std::cout << "Usage: MatchManager <engine1> <engine2> [options...]" << std::endl;
+        return 1;
+    }
+
+    while (args >> token)
     {
         if (token.find("-time") == 0)
         {
@@ -149,11 +159,6 @@ int main(int argc, char **argv)
                 args >> fenpath;
             else
                 fenpath = token.substr(std::string("-fen").size());
-        }
-        else
-        {
-            name_1 = token;
-            args >> name_2;
         }
     }
 

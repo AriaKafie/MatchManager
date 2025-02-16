@@ -114,8 +114,8 @@ inline Bitboard rank_bb(Square s) {
     return RANK_1 << 8 * (s / 8);
 }
 
-inline std::string to_string(Bitboard b) {
-
+inline std::string to_string(Bitboard b)
+{
     std::string l = "+---+---+---+---+---+---+---+---+\n", s = l;
 
     for (Bitboard bit = square_bb(A8); bit; bit >>= 1)

@@ -9,23 +9,15 @@
 
 std::string Engine::best_move()
 {
-    log << "writing to stdin" << std::endl;
-
     write_to_stdin("go movetime " + std::to_string(m_thinktime) + "\n");
     std::this_thread::sleep_for(std::chrono::milliseconds(m_thinktime));
 
-    log << "wrote to stdin" << std::endl;
-
     std::string std_out, token;
-
-    log << "reading stdout" << std::endl;
 
     for (std_out = read_stdout();
          std_out.find("bestmove") == std::string::npos || std_out.find('\n', std_out.rfind("bestmove")) == std::string::npos;
          std_out += read_stdout())
     {}
-
-    log << "read stdout" << std::endl;
 
     std::istringstream is(std_out.substr(std_out.rfind("bestmove")));
     is >> token >> token;
