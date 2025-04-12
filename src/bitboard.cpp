@@ -56,18 +56,18 @@ void Bitboards::init()
         PawnAttacks[BLACK][s1] = pawn_attacks<BLACK>(square_bb(s1));
     }
     
-    uint8_t clearK = 0b0111;
-    uint8_t clearQ = 0b1011;
-    uint8_t cleark = 0b1101;
-    uint8_t clearq = 0b1110;
+    uint8_t clearK = ~8;
+    uint8_t clearQ = ~4;
+    uint8_t cleark = ~2;
+    uint8_t clearq = ~1;
 
     for (int i = 0; i < 1 << 5; i++)
     {
         Bitboard w_occ = generate_occupancy(square_bb(A1, E1, H1, A8, H8), i);
         Bitboard b_occ = generate_occupancy(square_bb(A8, E8, H8, A1, H1), i);
 
-        uint8_t w_rights = 0b1111;
-        uint8_t b_rights = 0b1111;
+        uint8_t w_rights = 0xf;
+        uint8_t b_rights = 0xf;
 
         if ((w_occ & square_bb(A1)) == 0) w_rights &= clearQ;
         if ((w_occ & square_bb(E1)) == 0) w_rights &= clearK & clearQ;

@@ -1,6 +1,7 @@
 
 #include "mm.h"
 
+#include <algorithm>
 #include <iomanip>
 #include <iostream>
 #include <chrono>
@@ -63,7 +64,7 @@ void Match::run_games(bool *stop)
 
         while (!*stop)
         {
-            Engine& engine = pos.side_to_move() == e1_color ? e1 : e2;
+            Engine &engine = pos.side_to_move() == e1_color ? e1 : e2;
 
             std::string movestr = engine.best_move();
             Move        move    = pos.uci_to_move(movestr);
@@ -139,26 +140,17 @@ int main(int argc, char *argv[])
 
     while (args >> token)
     {
-        if (token.find("-time") == 0)
+        if (token.find("--time=") == 0)
         {
-            if (token == "-time")
-                args >> time;
-            else
-                time = std::stoi(token.substr(std::string("-time").size()));
+            time = std::stoi(token.substr(token.find('=') + 1));
         }
-        else if (token.find("-thread") == 0)
+        else if (token.find("--threads=") == 0)
         {
-            if (token == "-thread")
-                args >> threads;
-            else
-                threads = std::stoi(token.substr(std::string("-thread").size()));
+            threads = std::stoi(token.substr(token.find('=') + 1));
         }
-        else if (token.find("-fen") == 0)
+        else if (token.find("--fen=") == 0)
         {
-            if (token == "-fen")
-                args >> fenpath;
-            else
-                fenpath = token.substr(std::string("-fen").size());
+            fenpath = token.substr(token.find('=') + 1);
         }
     }
 

@@ -10,7 +10,6 @@
 std::string Engine::best_move()
 {
     write_to_stdin("go movetime " + std::to_string(m_thinktime) + "\n");
-    std::this_thread::sleep_for(std::chrono::milliseconds(m_thinktime));
 
     std::string std_out, token;
 
@@ -54,7 +53,7 @@ Engine::Engine(const std::string &path, int thinktime, int id) : m_stdin    (NUL
     std::string relative_path = path.find('\\') == std::string::npos ? path : path.substr(path.rfind('\\') + 1);
     m_name = relative_path.substr(0, relative_path.find(".exe"));
 
-    log.open(m_name+"_id"+std::to_string(m_id)+".txt");
+    log.open(std::string("logs\\")+m_name+"_id"+std::to_string(m_id)+".txt");
 
     PROCESS_INFORMATION piProcInfo;
     STARTUPINFO siStartInfo;

@@ -38,7 +38,7 @@ Move *make_moves(Move *list, Square from, Bitboard to)
 }
 
 template<Color Us>
-Move *generate_moves(Move *list, const Position &pos)
+Move *generate_moves(Move *list, const Position& pos)
 {
     constexpr Color Them           = !Us;
     constexpr Piece FriendlyPawn   = make_piece(Us,   PAWN);
