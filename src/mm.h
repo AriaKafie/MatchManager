@@ -14,6 +14,8 @@
 #define DEFAULT_TIME 100
 #define DEFAULT_THREADS 1
 
+enum Status { PAUSE, GO, QUIT };
+
 class Match
 {
 public:
@@ -39,7 +41,7 @@ public:
 
     ~Match() { log.close(); }
 
-    void run_games(bool *stop);
+    void run_games(Status *status);
 
     Engine e1;
     Engine e2;

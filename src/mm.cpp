@@ -27,21 +27,31 @@ std::string time_()
     return ss.str();
 }
 
-void await_stop(bool *stop)
+void process_stdin(Status *status)
 {
     std::string in;
+
     do
+    {
         std::getline(std::cin, in);
-    while (in != "stop" && in != "quit");
+        std::istringstream is(in);
+        is >> in;
 
-    *stop = true;
+        if (in == "pause")
+            *status = PAUSE;
+        else if (in == "go")
+            *status = GO;
+
+    } while (in != "stop" && in != "quit");
+
+    *status = QUIT;
 }
 
-void run_match(Match *match, bool *stop) {
-    match->run_games(stop);
+void run_match(Match *match, Status *status) {
+    match->run_games(status);
 }
 
-void Match::run_games(bool *stop)
+void Match::run_games(Status *status)
 {    
     for (int i = 0; i < fens.size(); i++)
     {
@@ -62,8 +72,12 @@ void Match::run_games(bool *stop)
         game_string += "moves ";
         log << game_string;
 
-        while (!*stop)
+        while (*status != QUIT)
         {
+            while (*status == PAUSE)
+                Sleep(100);
+            if (*status == QUIT) break;
+
             Engine &engine = pos.side_to_move() == e1_color ? e1 : e2;
 
             std::string movestr = engine.best_move();
@@ -107,7 +121,7 @@ void Match::run_games(bool *stop)
             }
         }
 
-        if (*stop || failed) break;
+        if (*status == QUIT || failed) break;
     }
 
     e1.kill();
@@ -160,14 +174,14 @@ int main(int argc, char *argv[])
     std::vector<Match*> matches;
     std::vector<std::thread> thread_pool;
 
-    bool stop = false;
-    std::thread t(await_stop, &stop);
+    Status status = GO;
+    std::thread t(process_stdin, &status);
     t.detach();
 
     for (int id = 0; id < threads; id++)
     {
         matches.push_back(new Match(path_1, path_2, time, id, fenpath));
-        thread_pool.emplace_back(run_match, matches.back(), &stop);
+        thread_pool.emplace_back(run_match, matches.back(), &status);
     }
 
     for (std::thread &thread : thread_pool)
@@ -189,9 +203,9 @@ int main(int argc, char *argv[])
     double e1_winrate = decisive > 0 ? double(e1_wins) / decisive : 0.0;
     double e2_winrate = decisive > 0 ? double(e2_wins) / decisive : 0.0;
 
-    std::cout << "+-----------------+-------+----------+" << std::endl;
-    std::cout << "|     Outcome     |   #   | Win Rate |" << std::endl;
-    std::cout << "+-----------------+-------+----------+" << std::endl;
+    printf("+-----------------+-------+----------+\n");
+    printf("|     Outcome     |   #   | Win Rate |\n");
+    printf("+-----------------+-------+----------+\n");
 
     printf("| %-16s|%6d |%8.2f%% |\n", name_1.c_str(), e1_wins, e1_winrate * 100);
     printf("| %-16s|%6d |%8.2f%% |\n", name_2.c_str(), e2_wins, e2_winrate * 100);
