@@ -74,9 +74,7 @@ void Match::run_games(Status *status)
 
         while (*status != QUIT)
         {
-            while (*status == PAUSE)
-                Sleep(100);
-            if (*status == QUIT) break;
+            for (;*status == PAUSE; Sleep(100));
 
             Engine &engine = pos.side_to_move() == e1_color ? e1 : e2;
 
