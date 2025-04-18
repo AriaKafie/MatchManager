@@ -1,7 +1,9 @@
 
+#define NOMINMAX
+
 #include "mm.h"
 
-#include <algorithm>
+#include "stats.h"
 #include <iomanip>
 #include <iostream>
 #include <chrono>
@@ -52,13 +54,16 @@ void run_match(Match *match, Status *status) {
 }
 
 void Match::run_games(Status *status)
-{    
+{
     for (int i = 0; i < fens.size(); i++)
     {
         std::string fen = fens[i];
 
-        printf("%s: Match %d: %s: %d %s: %d Draws: %d Games: %d/%d\n",
-               time_().c_str(), m_id, e1.name().c_str(), e1.wins, e2.name().c_str(), e2.wins, draws, i, fens.size());
+        printf("%s: Match %d: %s: %d %s: %d Draws: %d (%+d +/- %d) Games: %d/%llu\n",
+               time_().c_str(), m_id, e1.name().c_str(), e1.wins, e2.name().c_str(), e2.wins, draws,
+               (int)elo_diff  (e1.wins, e2.wins, draws),
+               (int)elo_margin(e1.wins, e2.wins, draws),
+               i, fens.size());
 
         pos.set(fen);
 
@@ -182,10 +187,10 @@ int main(int argc, char *argv[])
         thread_pool.emplace_back(run_match, matches.back(), &status);
     }
 
-    for (std::thread &thread : thread_pool)
+    for (std::thread& thread : thread_pool)
         thread.join();
 
-    int e1_wins = 0, e2_wins = 0, draws = 0;
+    double e1_wins = 0, e2_wins = 0, draws = 0;
 
     for (Match *m : matches)
     {
@@ -196,7 +201,7 @@ int main(int argc, char *argv[])
         delete m;
     }
 
-    int total = e1_wins + e2_wins + draws, decisive = total - draws;
+    double total = e1_wins + e2_wins + draws, decisive = total - draws;
     
     double e1_winrate = decisive > 0 ? double(e1_wins) / decisive : 0.0;
     double e2_winrate = decisive > 0 ? double(e2_wins) / decisive : 0.0;
@@ -205,8 +210,11 @@ int main(int argc, char *argv[])
     printf("|     Outcome     |   #   | Win Rate |\n");
     printf("+-----------------+-------+----------+\n");
 
-    printf("| %-16s|%6d |%8.2f%% |\n", name_1.c_str(), e1_wins, e1_winrate * 100);
-    printf("| %-16s|%6d |%8.2f%% |\n", name_2.c_str(), e2_wins, e2_winrate * 100);
-    printf("| Draws           |%6d |          |\n", draws);
-    printf("| Total           |%6d |%6d ms |\n+-----------------+-------+----------+\n", total, time);
+    printf("| %-16s|%6d |%8.2f%% |\n", name_1.c_str(), (int)e1_wins, e1_winrate * 100);
+    printf("| %-16s|%6d |%8.2f%% |\n", name_2.c_str(), (int)e2_wins, e2_winrate * 100);
+    printf("| Draws           |%6d |          |\n", (int)draws);
+    printf("| Total           |%6d |%6d ms |\n+-----------------+-------+----------+\n", (int)total, time);
+
+    printf("%s is %f (+/- %f) elo away from %s\n",
+        name_1.c_str(), elo_diff(e1_wins, e2_wins, draws), elo_margin(e1_wins, e2_wins, draws), name_2.c_str());
 }
