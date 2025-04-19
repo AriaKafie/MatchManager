@@ -82,7 +82,7 @@ void Match::run_games(Status *status)
     {
         std::string fen = fens[i];
 
-        printf("%s: Match %d: %s: %d %s: %d Draws: %d (%+d +/- %d) Games: %d/%llu\n",
+        printf("%s: Match %d %s %d %s %d Draws %d (%+d +/- %d) Game %d/%llu\n",
                time_().c_str(), m_id, e1.name().c_str(), e1.wins, e2.name().c_str(), e2.wins, draws,
                (int)elo_diff  (e1.wins, e2.wins, draws),
                (int)elo_margin(e1.wins, e2.wins, draws),
@@ -158,8 +158,6 @@ void Match::run_games(Status *status)
 
 int main(int argc, char *argv[])
 {
-    std::string usage = "Usage: MatchManager <engine1> <engine2> [-threads <threads>] [-time <milliseconds>] [-fen <fenfile>]";
-
     Bitboards::init();
     Position::init();
 
@@ -174,17 +172,12 @@ int main(int argc, char *argv[])
 
     std::istringstream args(tokens);
 
-    if (!(args >> name_1 >> name_2))
+    if (!(args >> name_1 >> name_2)
+        || !get_opt("time", time, argc, argv)
+        || !get_opt("threads", threads, argc, argv)
+        || !get_opt("fen", fenpath, argc, argv))
     {
-        std::cout << usage << std::endl;
-        return 1;
-    }
-
-    if (!( get_opt("time", time, argc, argv)
-        && get_opt("threads", threads, argc, argv)
-        && get_opt("fen", fenpath, argc, argv)))
-    {
-        std::cout << usage << std::endl;
+        std::cout << "Usage: MatchManager <engine1> <engine2> [-threads <threads>] [-time <milliseconds>] [-fen <fenfile>]" << std::endl;
         return 1;
     }
 
