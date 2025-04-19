@@ -41,10 +41,10 @@ std::string Engine::read_stdout()
 
     buffer[read] = '\0';
 
-    return buffer;
+    return std::string(buffer);
 }
 
-Engine::Engine(const std::string &path, int thinktime, int id) : m_stdin    (NULL),
+Engine::Engine(const std::string& path, int thinktime, int id) : m_stdin    (NULL),
                                                                  m_stdout   (NULL),
                                                                  m_thinktime(thinktime),
                                                                  wins       (0),
@@ -53,7 +53,7 @@ Engine::Engine(const std::string &path, int thinktime, int id) : m_stdin    (NUL
     std::string relative_path = path.find('\\') == std::string::npos ? path : path.substr(path.rfind('\\') + 1);
     m_name = relative_path.substr(0, relative_path.find(".exe"));
 
-    log.open(std::string("logs\\")+m_name+"_id"+std::to_string(m_id)+".txt");
+    //log.open(std::string("logs\\")+m_name+"_id"+std::to_string(m_id)+".txt");
 
     PROCESS_INFORMATION piProcInfo;
     STARTUPINFO siStartInfo;

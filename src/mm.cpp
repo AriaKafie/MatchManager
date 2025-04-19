@@ -1,9 +1,11 @@
 
+#define _CRT_SECURE_NO_WARNINGS
 #define NOMINMAX
 
 #include "mm.h"
 
-#include "stats.h"
+#include <ctime>
+#include <chrono>
 #include <iomanip>
 #include <iostream>
 #include <chrono>
@@ -15,6 +17,7 @@
 #include "bitboard.h"
 #include "engine.h"
 #include "position.h"
+#include "stats.h"
 
 template<typename T>
 bool get_opt(const std::string& option, T& var, int argc, char *argv[])
@@ -41,15 +44,16 @@ bool get_opt(const std::string& option, T& var, int argc, char *argv[])
 
 std::string time_()
 {
-    std::time_t now_c = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    auto now = std::chrono::system_clock::now();
 
-    std::tm now_tm;
-    localtime_s(&now_tm, &now_c);
+    std::time_t current_time = std::chrono::system_clock::to_time_t(now);
 
-    std::stringstream ss;
-    ss << std::put_time(&now_tm, "%H:%M:%S");
+    std::tm *local_time = std::localtime(&current_time);
 
-    return ss.str();
+    std::ostringstream time_stream;
+    time_stream << std::put_time(local_time, "%H:%M:%S");
+
+    return time_stream.str();
 }
 
 void handle_stdin(Status *status)
@@ -82,7 +86,7 @@ void Match::run_games(Status *status)
     {
         std::string fen = fens[i];
 
-        printf("%s: Match %d %s %d %s %d Draws %d (%+d +/- %d) Game %d/%llu\n",
+        printf("%s Match %d %s %d %s %d Draws %d (%+d +/- %d) Game %d/%llu\n",
                time_().c_str(), m_id, e1.name().c_str(), e1.wins, e2.name().c_str(), e2.wins, draws,
                (int)elo_diff  (e1.wins, e2.wins, draws),
                (int)elo_margin(e1.wins, e2.wins, draws),
@@ -92,12 +96,12 @@ void Match::run_games(Status *status)
 
         Color e1_color = pos.side_to_move(), e2_color = !e1_color;
 
-        std::string game_string = "position fen " + fen + " ";
+        std::string game_string = "position fen " + fen;
 
         e1.write_to_stdin("ucinewgame\n" + game_string + "\n");
         e2.write_to_stdin("ucinewgame\n" + game_string + "\n");
 
-        game_string += "moves ";
+        game_string += " moves";
         log << game_string;
 
         while (*status != QUIT)
@@ -120,7 +124,7 @@ void Match::run_games(Status *status)
                 break;
             }
 
-            game_string += movestr + " ";
+            game_string += " " + movestr;
             log << movestr << " ";
 
             e1.write_to_stdin(game_string + "\n");
