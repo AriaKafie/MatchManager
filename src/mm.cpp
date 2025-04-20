@@ -19,6 +19,11 @@
 #include "position.h"
 #include "stats.h"
 
+Color random_color() {
+    static std::mt19937_64 rng(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
+    return rng() & 1;
+}
+
 template<typename T>
 bool get_opt(const std::string& option, T& var, int argc, char *argv[])
 {
@@ -94,7 +99,7 @@ void Match::run_games(Status *status)
 
         pos.set(fen);
 
-        Color e1_color = pos.side_to_move(), e2_color = !e1_color;
+        Color e1_color = random_color(), e2_color = !e1_color;
 
         std::string game_string = "position fen " + fen;
 
