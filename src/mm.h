@@ -48,7 +48,7 @@ public:
     int    draws;
 
 private:
-    std::string uci_to_pgn(const std::string& uci);
+    std::string uci_to_pgn(const std::string& uci, Color e1_color, Color e2_color);
 
     Position                 pos;
     int                      m_id;
@@ -57,7 +57,7 @@ private:
     std::vector<std::string> fens;
 };
 
-inline std::string Match::uci_to_pgn(const std::string& uci)
+inline std::string Match::uci_to_pgn(const std::string& uci, Color e1_color, Color e2_color)
 {
     std::string pgn, fen, token;
     Position p;
@@ -80,8 +80,8 @@ inline std::string Match::uci_to_pgn(const std::string& uci)
 
     p.set(fen);
 
-    pgn += "[White \"" + (p.white_to_move() ? e1.name() : e2.name()) + "\"]\n";
-    pgn += "[Black \"" + (p.white_to_move() ? e2.name() : e1.name()) + "\"]\n";
+    pgn += "[White \"" + (e1_color == WHITE ? e1.name() : e2.name()) + "\"]\n";
+    pgn += "[Black \"" + (e1_color == BLACK ? e1.name() : e2.name()) + "\"]\n";
     pgn += "[FEN \"" + fen.substr(0, fen.size() - 1) + "\"]\n";
 
     for (int ply = 0, movenum = 1; is >> token; ply++)

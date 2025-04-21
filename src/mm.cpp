@@ -49,9 +49,7 @@ bool get_opt(const std::string& option, T& var, int argc, char *argv[])
 
 std::string time_()
 {
-    auto now = std::chrono::system_clock::now();
-
-    std::time_t current_time = std::chrono::system_clock::to_time_t(now);
+    std::time_t current_time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 
     std::tm *local_time = std::localtime(&current_time);
 
@@ -120,9 +118,9 @@ void Match::run_games(Status *status)
 
             if (move == Move::null())
             {
-                log                            << std::endl
-                    << uci_to_pgn(game_string) << std::endl
-                    << pos.to_string()         << std::endl 
+                log                                                      << std::endl
+                    << uci_to_pgn(game_string, e1_color, e2_color)       << std::endl
+                    << pos.to_string()                                   << std::endl
                     << engine.name() << ": " << movestr << " <- Invalid" << std::endl;
 
                 failed = true;
@@ -145,7 +143,7 @@ void Match::run_games(Status *status)
                     draws++;
 
                 log << std::endl
-                    << uci_to_pgn(game_string) << std::endl
+                    << uci_to_pgn(game_string, e1_color, e2_color) << std::endl
                     << (g == MATE       ? "Checkmate"
                       : g == STALEMATE  ? "Stalemate"
                       : g == REPETITION ? "Repetition"
@@ -222,8 +220,8 @@ int main(int argc, char *argv[])
 
     int total = e1_wins + e2_wins + draws, decisive = total - draws;
     
-    double e1_winrate = decisive > 0 ? e1_wins / decisive : 0.0;
-    double e2_winrate = decisive > 0 ? e2_wins / decisive : 0.0;
+    double e1_winrate = decisive > 0 ? (double)e1_wins / decisive : 0.0;
+    double e2_winrate = decisive > 0 ? (double)e2_wins / decisive : 0.0;
 
     printf("+-----------------+-------+----------+\n");
     printf("|     Outcome     |   #   | Win Rate |\n");
