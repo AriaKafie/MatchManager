@@ -128,7 +128,7 @@ void Match::run_games(Status *status)
             }
 
             game_string += " " + movestr;
-            log << movestr << " ";
+            log << " " << movestr;
 
             e1.write_to_stdin(game_string + "\n");
             e2.write_to_stdin(game_string + "\n");

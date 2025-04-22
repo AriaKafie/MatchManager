@@ -26,8 +26,8 @@ public:
           std::string fenpath) : e1(path_1, time, id),
                                  e2(path_2, time, id), m_id(id), failed(false), draws(0)
     {
-        e1.write_to_stdin("uci\nisready\n");
-        e2.write_to_stdin("uci\nisready\n");
+        e1.write_to_stdin("noverbose\nuci\nisready\n");
+        e2.write_to_stdin("noverbose\nuci\nisready\n");
 
         log.open(std::string("logs\\")+e1.name()+"_"+e2.name()+"_"+std::to_string(time)+"_id"+std::to_string(m_id)+".txt");
         
