@@ -41,7 +41,7 @@ public:
 
     ~Match() { log.close(); }
 
-    void run_games(Status *status);
+    void run(Status *status);
 
     Engine e1;
     Engine e2;

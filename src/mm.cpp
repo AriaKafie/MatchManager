@@ -79,11 +79,7 @@ void handle_stdin(Status *status)
     *status = QUIT;
 }
 
-void run_match(Match *match, Status *status) {
-    match->run_games(status);
-}
-
-void Match::run_games(Status *status)
+void Match::run(Status *status)
 {
     for (int i = 0; i < fens.size(); i++)
     {
@@ -188,6 +184,10 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    std::cout << "Using time="  << time
+              << "ms, threads=" << threads
+              << ", fenpath="   << fenpath << std::endl;
+
     std::string path_1 = std::string("engines\\") + name_1 + ".exe";
     std::string path_2 = std::string("engines\\") + name_2 + ".exe";
 
@@ -201,7 +201,7 @@ int main(int argc, char *argv[])
     for (int id = 0; id < threads; id++)
     {
         matches.push_back(new Match(path_1, path_2, time, id, fenpath));
-        thread_pool.emplace_back(run_match, matches.back(), &status);
+        thread_pool.emplace_back(&Match::run, matches.back(), &status);
     }
 
     for (std::thread& thread : thread_pool)
