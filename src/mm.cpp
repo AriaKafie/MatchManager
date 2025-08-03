@@ -4,14 +4,13 @@
 
 #include "mm.h"
 
-#include <ctime>
 #include <chrono>
+#include <ctime>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <chrono>
-#include <thread>
 #include <sstream>
-#include <fstream>
+#include <thread>
 #include <vector>
 
 #include "bitboard.h"
@@ -25,21 +24,21 @@ Color random_color() {
 }
 
 template<typename T>
-bool get_opt(const std::string& option, T& var, int argc, char *argv[])
+bool get_opt(char opt, T& var, int argc, char *argv[])
 {
-    std::string opt = "-" + option, args, token;
+    std::string prefix = "-" + std::string(1, opt), args, token;
 
     for (int i = 3; i < argc; i++)
         args += std::string(argv[i]) + " ";
 
     for (std::istringstream is(args); is >> token;)
     {
-        if (token == opt)
+        if (token == prefix)
             return bool(is >> var);
 
-        if (token.find(opt) == 0)
+        if (token.find(prefix) == 0)
         {
-            std::istringstream i(token.substr(opt.length()));
+            std::istringstream i(token.substr(prefix.length()));
             return bool(i >> var);
         }
     }
@@ -107,7 +106,7 @@ void Match::run(Status *status)
         {
             for (;*status == PAUSE; Sleep(100));
 
-            Engine &engine = pos.side_to_move() == e1_color ? e1 : e2;
+            Engine& engine = pos.side_to_move() == e1_color ? e1 : e2;
 
             std::string movestr = engine.best_move();
             Move        move    = pos.uci_to_move(movestr);
@@ -176,17 +175,17 @@ int main(int argc, char *argv[])
     std::istringstream args(tokens);
 
     if (!(args >> name_1 >> name_2)
-        || !get_opt("time", time, argc, argv)
-        || !get_opt("threads", threads, argc, argv)
-        || !get_opt("fen", fenpath, argc, argv))
+        || !get_opt('T', time,    argc, argv)
+        || !get_opt('t', threads, argc, argv)
+        || !get_opt('f', fenpath, argc, argv))
     {
-        std::cout << "Usage: MatchManager <engine1> <engine2> [-threads <threads>] [-time <milliseconds>] [-fen <fenfile>]" << std::endl;
+        std::cout << "Usage: MatchManager <engine1> <engine2> [-T <time>] [-t <threads>] [-f <fenfile>]" << std::endl;
         return 1;
     }
 
-    std::cout << "Using time="  << time
-              << "ms, threads=" << threads
-              << ", fenpath="   << fenpath << std::endl;
+    std::cout << "Using time=" << time    << "ms, "
+              << "threads="    << threads << ", "
+              << "fenpath="    << fenpath << std::endl;
 
     std::string path_1 = std::string("engines\\") + name_1 + ".exe";
     std::string path_2 = std::string("engines\\") + name_2 + ".exe";
