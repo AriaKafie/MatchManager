@@ -1,5 +1,5 @@
 ## Overview
-MatchManager is a command line tool that allows for multithreaded match execution between two UCI-compatible, allowing for precise ELO difference estimation. The system features parallelized IPC, time-controlled games, and randomization to ensure unbiased results. It communicates with each engine through stdin/stdout pipes, interprets UCI move outputs, and tracks game outcomes including wins, losses, draws, and undefined behavior such as crashes and invalid responses.
+MatchManager is a command line tool that allows for multithreaded match execution between two UCI-compatible chess engines, allowing for precise ELO difference estimation. The system features parallelized IPC, time-controlled games, and randomization to ensure unbiased results. It communicates with each engine through stdin/stdout pipes, interprets UCI move outputs, and tracks game outcomes including wins, losses, draws, and undefined behavior such as crashes and invalid responses.
 
 ## Running MatchManager (command prompt)
 ```
