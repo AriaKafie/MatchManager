@@ -13,6 +13,7 @@
 
 #define DEFAULT_TIME 100
 #define DEFAULT_THREADS 1
+#define DEFAULT_FEN_FILE "lc01k.txt"
 
 enum Status { PAUSE, GO, QUIT };
 

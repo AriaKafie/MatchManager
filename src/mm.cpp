@@ -9,6 +9,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <regex>
 #include <sstream>
 #include <thread>
 #include <vector>
@@ -23,27 +24,37 @@ Color random_color() {
     return rng() & 1;
 }
 
-template<typename T>
-bool get_opt(char opt, T& var, int argc, char *argv[])
+std::string get_with_default(std::string flag, int argc, char *argv[], std::string defval)
 {
-    std::string prefix = "-" + std::string(1, opt), args, token;
+    std::string prefix = "--" + flag + "=";
 
-    for (int i = 3; i < argc; i++)
-        args += std::string(argv[i]) + " ";
-
-    for (std::istringstream is(args); is >> token;)
+    for (int i = 1; i < argc; i++)
     {
-        if (token == prefix)
-            return bool(is >> var);
+        std::string arg = argv[i];
 
-        if (token.find(prefix) == 0)
+        if (arg.find(prefix) == 0)
         {
-            std::istringstream i(token.substr(prefix.length()));
-            return bool(i >> var);
+            std::string val = arg.substr(prefix.length());
+            std::cout << "found flag " << flag << " = " << val << std::endl;
+
+            return val;
         }
     }
 
-    return true;
+    return defval;
+}
+
+std::string get_required(std::string flag, int argc, char* argv[])
+{
+    std::string val = get_with_default(flag, argc, argv, "");
+
+    if (val.empty())
+    {
+        std::cerr << "Required flag " << flag << " was not found" << std::endl;
+        std::exit(1);
+    }
+
+    return val;
 }
 
 std::string time_()
@@ -84,11 +95,21 @@ void Match::run(Status *status)
     {
         std::string fen = fens[i];
 
-        printf("%s Match %d %s %d %s %d Draws %d (%+d +/- %d) Game %d/%llu\n",
-               time_().c_str(), m_id, e1.name().c_str(), e1.wins, e2.name().c_str(), e2.wins, draws,
-               (int)elo_diff  (e1.wins, e2.wins, draws),
-               (int)elo_margin(e1.wins, e2.wins, draws),
-               i, fens.size());
+        printf
+        (   
+            "%s Match %d %s %d %s %d Draws %d (%+d +/- %d) Game %d/%llu\n",
+            time_().c_str(),
+            m_id,
+            e1.name().c_str(),
+            e1.wins,
+            e2.name().c_str(),
+            e2.wins,
+            draws,
+            (int)elo_diff  (e1.wins, e2.wins, draws),
+            (int)elo_margin(e1.wins, e2.wins, draws),
+            i,
+            fens.size()
+        );
 
         pos.set(fen);
 
@@ -163,32 +184,29 @@ int main(int argc, char *argv[])
     Bitboards::init();
     Position::init();
 
-    std::string name_1, name_2, fenpath = "lc01k.txt";
-    int time    = DEFAULT_TIME;
-    int threads = DEFAULT_THREADS;
-
-    std::string tokens, token;
-
     for (int i = 1; i < argc; i++)
-        tokens += std::string(argv[i]) + " ";
-
-    std::istringstream args(tokens);
-
-    if (!(args >> name_1 >> name_2)
-        || !get_opt('T', time,    argc, argv)
-        || !get_opt('t', threads, argc, argv)
-        || !get_opt('f', fenpath, argc, argv))
     {
-        std::cout << "Usage: MatchManager <engine1> <engine2> [-T <time>] [-t <threads>] [-f <fenfile>]" << std::endl;
-        return 1;
+        if (!std::regex_match(argv[i], std::regex("--(engine1|engine2|time|threads|fen_file)=.+")))
+        {
+            std::cerr << "Bad arg '" << argv[i] << "'. Expected --flag=value\n" <<
+R"(Required flags:
+--engine1         path to engine1
+--engine2         path to engine2
+
+Optional flags:
+--time            milliseconds of movetime [50]
+--threads         # of matches to run in parallel [1]
+--fen_file        path to the fen strings [lc01k.txt]
+)";
+            std::exit(1);
+        }
     }
 
-    std::cout << "Using time=" << time    << "ms, "
-              << "threads="    << threads << ", "
-              << "fenpath="    << fenpath << std::endl;
-
-    std::string path_1 = std::string("engines\\") + name_1 + ".exe";
-    std::string path_2 = std::string("engines\\") + name_2 + ".exe";
+    std::string engine1_path = get_required("engine1", argc, argv);
+    std::string engine2_path = get_required("engine2", argc, argv);
+    int time = std::stoi(get_with_default("time", argc, argv, "50"));
+    int threads = std::stoi(get_with_default("threads", argc, argv, "1"));
+    std::string fen_file = get_with_default("fen_file", argc, argv, "lc01k.txt");
 
     std::vector<Match*> matches;
     std::vector<std::thread> thread_pool;
@@ -199,7 +217,7 @@ int main(int argc, char *argv[])
 
     for (int id = 0; id < threads; id++)
     {
-        matches.push_back(new Match(path_1, path_2, time, id, fenpath));
+        matches.push_back(new Match(engine1_path, engine2_path, time, id, fen_file));
         thread_pool.emplace_back(&Match::run, matches.back(), &status);
     }
 
@@ -226,11 +244,20 @@ int main(int argc, char *argv[])
     printf("|     Outcome     |   #   | Win Rate |\n");
     printf("+-----------------+-------+----------+\n");
 
-    printf("| %-16s|%6d |%8.2f%% |\n", name_1.c_str(), e1_wins, e1_winrate * 100);
-    printf("| %-16s|%6d |%8.2f%% |\n", name_2.c_str(), e2_wins, e2_winrate * 100);
+    printf("| %-16s|%6d |%8.2f%% |\n", engine1_path.c_str(), e1_wins, e1_winrate * 100);
+    printf("| %-16s|%6d |%8.2f%% |\n", engine2_path.c_str(), e2_wins, e2_winrate * 100);
     printf("| Draws           |%6d |          |\n", draws);
     printf("| Total           |%6d |%6d ms |\n+-----------------+-------+----------+\n", total, time);
 
-    printf("%s is %f (+/- %f) elo away from %s\n",
-        name_1.c_str(), elo_diff(e1_wins, e2_wins, draws), elo_margin(e1_wins, e2_wins, draws), name_2.c_str());
+    double diff = elo_diff(e1_wins, e2_wins, draws);
+    double margin = elo_margin(e1_wins, e2_wins, draws);
+
+    printf
+    (
+        "%s is %f (+/- %f) elo ahead of %s\n",
+        engine1_path.c_str(),
+        diff,
+        margin,
+        engine2_path.c_str()
+    );
 }
