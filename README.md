@@ -3,16 +3,11 @@ MatchManager is a command line tool that allows for multithreaded match executio
 
 ## Running MatchManager (command prompt)
 ```
-MatchManager <engine1> <engine2> [-T <time>] [-t <threads>] [-f <fenfile>]
-```
-for example:
+MatchManager --engine1=path\to\engine1.exe --engine2=path\to\engine2.exe
+// pits engine1.exe against engine2.exe using the default time controls, threads, and fen file (100ms per move, 1 thread, lc01k.txt)
 
-```
-MatchManager tt64 tt128
-// pits "tt64.exe" against "tt128.exe" using the default time controls, threads, and fenfile (100ms per move, 1 thread, lc01k.txt)
-
-MatchManager tt64 tt128 -funfair.txt -t16 -T250
-// does the same, but uses 250ms per move, draws fens from "unfair.txt", and runs the match 16 times in parallel
+MatchManager --time=250 --engine1=path\to\engine1.exe --engine2=path\to\engine2.exe --fen_file=path\to\fens.txt --threads=16
+// does the same, but runs the match 16 times in parallel, with custom time and fen file settings
 ```
 
 ## Commands
