@@ -24,7 +24,7 @@ Color random_color() {
     return rng() & 1;
 }
 
-std::string get_with_default(std::string flag, int argc, char *argv[], std::string defval)
+std::string get_with_default(const std::string& flag, int argc, char *argv[], std::string defval)
 {
     std::string prefix = "--" + flag + "=";
 
@@ -44,7 +44,7 @@ std::string get_with_default(std::string flag, int argc, char *argv[], std::stri
     return defval;
 }
 
-std::string get_required(std::string flag, int argc, char* argv[])
+std::string get_required(const std::string& flag, int argc, char* argv[])
 {
     std::string val = get_with_default(flag, argc, argv, "");
 
@@ -213,7 +213,7 @@ Optional flags:
 
     std::string engine1_path = get_required("engine1", argc, argv);
     std::string engine2_path = get_required("engine2", argc, argv);
-    int time = std::stoi(get_with_default("time", argc, argv, "50"));
+    int time = std::stoi(get_with_default("time", argc, argv, "100"));
     int threads = std::stoi(get_with_default("threads", argc, argv, "1"));
     std::string fen_file = get_with_default("fen_file", argc, argv, "lc01k.txt");
 
@@ -248,25 +248,23 @@ Optional flags:
     
     double e1_winrate = decisive > 0 ? (double)e1_wins / decisive : 0.0;
     double e2_winrate = decisive > 0 ? (double)e2_wins / decisive : 0.0;
-
-    printf("+-----------------+-------+----------+\n");
-    printf("|     Outcome     |   #   | Win Rate |\n");
-    printf("+-----------------+-------+----------+\n");
-
-    printf("| %-16s|%6d |%8.2f%% |\n", engine1_path.c_str(), e1_wins, e1_winrate * 100);
-    printf("| %-16s|%6d |%8.2f%% |\n", engine2_path.c_str(), e2_wins, e2_winrate * 100);
-    printf("| Draws           |%6d |          |\n", draws);
-    printf("| Total           |%6d |%6d ms |\n+-----------------+-------+----------+\n", total, time);
-
     double diff = elo_diff(e1_wins, e2_wins, draws);
     double margin = elo_margin(e1_wins, e2_wins, draws);
 
-    printf
-    (
-        "%s is %f (+/- %f) elo ahead of %s\n",
-        engine1_path.c_str(),
-        diff,
-        margin,
-        engine2_path.c_str()
-    );
+    printf(R"(
++-----------------+-------+----------+
+|     Outcome     |   #   | Win Rate |
++-----------------+-------+----------+
+| %-16s|%6d |%8.2f%% |
+| %-16s|%6d |%8.2f%% |
+| Draws           |%6d |          |
+| Total           |%6d |%6d ms |
++-----------------+-------+----------+
+%s is %f (+/- %f) elo ahead of %s
+)",
+    engine1_path.c_str(), e1_wins, e1_winrate * 100,
+    engine2_path.c_str(), e2_wins, e2_winrate * 100,
+    draws,
+    total, time,
+    engine1_path.c_str(), diff, margin, engine2_path.c_str());
 }
