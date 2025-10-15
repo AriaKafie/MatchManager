@@ -50,7 +50,16 @@ std::string get_required(std::string flag, int argc, char* argv[])
 
     if (val.empty())
     {
-        std::cerr << "Required flag " << flag << " was not found" << std::endl;
+        std::cerr << "Required flag " << flag << " was not found. Expected --flag=value\n" <<
+R"(Required flags:
+--engine1         path to engine1
+--engine2         path to engine2
+
+Optional flags:
+--time            milliseconds of movetime [50]
+--threads         # of matches to run in parallel [1]
+--fen_file        path to the fen strings [lc01k.txt]
+)";
         std::exit(1);
     }
 
