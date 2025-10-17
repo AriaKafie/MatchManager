@@ -9,61 +9,19 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <regex>
 #include <sstream>
 #include <thread>
 #include <vector>
 
 #include "bitboard.h"
 #include "engine.h"
+#include "args.h"
 #include "position.h"
 #include "stats.h"
 
 Color random_color() {
     static std::mt19937_64 rng(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
     return rng() & 1;
-}
-
-std::string get_with_default(const std::string& flag, int argc, char *argv[], std::string defval)
-{
-    std::string prefix = "--" + flag + "=";
-
-    for (int i = 1; i < argc; i++)
-    {
-        std::string arg = argv[i];
-
-        if (arg.find(prefix) == 0)
-        {
-            std::string val = arg.substr(prefix.length());
-            std::cout << "found flag " << flag << " = " << val << std::endl;
-
-            return val;
-        }
-    }
-
-    return defval;
-}
-
-std::string get_required(const std::string& flag, int argc, char* argv[])
-{
-    std::string val = get_with_default(flag, argc, argv, "");
-
-    if (val.empty())
-    {
-        std::cerr << "Required flag " << flag << " was not found. Expected --flag=value\n" <<
-R"(Required flags:
---engine1         path to engine1
---engine2         path to engine2
-
-Optional flags:
---time            milliseconds of movetime [100]
---threads         # of matches to run in parallel [1]
---fen_file        path to file with starting positions [lc01k.txt]
-)";
-        std::exit(1);
-    }
-
-    return val;
 }
 
 std::string time_()
@@ -193,24 +151,8 @@ int main(int argc, char *argv[])
     Bitboards::init();
     Position::init();
 
-    for (int i = 1; i < argc; i++)
-    {
-        if (!std::regex_match(argv[i], std::regex("--(engine1|engine2|time|threads|fen_file)=.+")))
-        {
-            std::cerr << "Bad arg '" << argv[i] << "'. Expected --flag=value\n" <<
-R"(Required flags:
---engine1         path to engine1
---engine2         path to engine2
-
-Optional flags:
---time            milliseconds of movetime [100]
---threads         # of matches to run in parallel [1]
---fen_file        path to file with starting positions [lc01k.txt]
-)";
-            std::exit(1);
-        }
-    }
-
+    verify_args(argc, argv);
+    
     std::string engine1_path = get_required("engine1", argc, argv);
     std::string engine2_path = get_required("engine2", argc, argv);
     int time = std::stoi(get_with_default("time", argc, argv, "100"));
