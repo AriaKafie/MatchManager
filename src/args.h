@@ -17,29 +17,15 @@ Optional flags:
     std::exit(1);
 }
 
-void verify_args(int argc, char *argv[])
-{
-    const std::string patterns[] = {
-        "--engine[12]=.+",
-        "--time=[1-9]\\d*",
-        "--threads=[1-9]\\d*",
-        "--fen_file=.+"
-    };
-
+void verify_args(int argc, char *argv[]) {
     for (int i = 1; i < argc; i++)
     {
-        bool invalid = true;
-
-        for (const std::string& pattern : patterns)
-        {
-            if (std::regex_match(argv[i], std::regex(pattern)))
-            {
-                invalid = false;
-                break;
-            }
-        }
-
-        if (invalid)
+        if (!(
+            std::regex_match(argv[i], std::regex("--engine[12]=.+"))
+        ||  std::regex_match(argv[i], std::regex("--time=[1-9]\\d*"))
+        ||  std::regex_match(argv[i], std::regex("--threads=[1-9]\\d*"))
+        ||  std::regex_match(argv[i], std::regex("--fen_file=.+"))
+        ))
         {
             std::cout << "Bad arg '" << argv[i] << "'" << std::endl;
             help();
