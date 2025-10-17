@@ -20,11 +20,12 @@ Optional flags:
 void verify_args(int argc, char *argv[]) {
     for (int i = 1; i < argc; i++)
     {
-        if (!(
-            std::regex_match(argv[i], std::regex("--engine[12]=.+"))
-        ||  std::regex_match(argv[i], std::regex("--time=[1-9]\\d*"))
-        ||  std::regex_match(argv[i], std::regex("--threads=[1-9]\\d*"))
-        ||  std::regex_match(argv[i], std::regex("--fen_file=.+"))
+        if 
+        (!(
+               std::regex_match(argv[i], std::regex("--engine[12]=.+"))
+            || std::regex_match(argv[i], std::regex("--time=[1-9]\\d*"))
+            || std::regex_match(argv[i], std::regex("--threads=[1-9]\\d*"))
+            || std::regex_match(argv[i], std::regex("--fen_file=.+"))
         ))
         {
             std::cout << "Bad arg '" << argv[i] << "'" << std::endl;
