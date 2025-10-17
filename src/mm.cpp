@@ -56,9 +56,9 @@ R"(Required flags:
 --engine2         path to engine2
 
 Optional flags:
---time            milliseconds of movetime [50]
+--time            milliseconds of movetime [100]
 --threads         # of matches to run in parallel [1]
---fen_file        path to the fen strings [lc01k.txt]
+--fen_file        path to file with starting positions [lc01k.txt]
 )";
         std::exit(1);
     }
@@ -203,9 +203,9 @@ R"(Required flags:
 --engine2         path to engine2
 
 Optional flags:
---time            milliseconds of movetime [50]
+--time            milliseconds of movetime [100]
 --threads         # of matches to run in parallel [1]
---fen_file        path to the fen strings [lc01k.txt]
+--fen_file        path to file with starting positions [lc01k.txt]
 )";
             std::exit(1);
         }
