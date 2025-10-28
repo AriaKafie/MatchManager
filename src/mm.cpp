@@ -19,6 +19,10 @@
 #include "position.h"
 #include "stats.h"
 
+uint64_t unix_ms() {
+    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+}
+
 Color random_color() {
     static std::mt19937_64 rng(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
     return rng() & 1;
@@ -58,13 +62,28 @@ void handle_stdin(Status *status)
 
 void Match::run(Status *status)
 {
+    uint64_t start_time = unix_ms();
+
     for (int i = 0; i < fens.size(); i++)
     {
         std::string fen = fens[i];
 
+        uint64_t elapsed = unix_ms() - start_time;
+        uint64_t time_per_game = elapsed / std::max(1, i);
+        uint64_t eta_seconds = time_per_game * (fens.size() - i) / 1000;
+
+        int hours = eta_seconds / 3600;
+        int minutes = (eta_seconds % 3600) / 60;
+        int seconds = eta_seconds % 60;
+
+        std::ostringstream oss;
+        oss << std::setw(2) << std::setfill('0') << hours << ":"
+            << std::setw(2) << std::setfill('0') << minutes << ":"
+            << std::setw(2) << std::setfill('0') << seconds;
+
         printf
         (   
-            "%s Match %d %s %d %s %d Draws %d (%+d +/- %d) Game %d/%llu\n",
+            "%s Match %d %s %d %s %d Draws %d (%+d +/- %d) Game %d/%llu ETA %s\n",
             time_().c_str(),
             m_id,
             e1.name().c_str(),
@@ -75,7 +94,8 @@ void Match::run(Status *status)
             (int)elo_diff  (e1.wins, e2.wins, draws),
             (int)elo_margin(e1.wins, e2.wins, draws),
             i,
-            fens.size()
+            fens.size(),
+            oss.str().c_str()
         );
 
         pos.set(fen);
@@ -166,8 +186,7 @@ int main(int argc, char *argv[])
     std::thread t(handle_stdin, &status);
     t.detach();
 
-    for (int id = 0; id < threads; id++)
-    {
+    for (int id = 0; id < threads; id++) {
         matches.push_back(new Match(engine1_path, engine2_path, time, id, fen_file));
         thread_pool.emplace_back(&Match::run, matches.back(), &status);
     }
@@ -177,12 +196,10 @@ int main(int argc, char *argv[])
 
     int e1_wins = 0, e2_wins = 0, draws = 0;
 
-    for (Match *m : matches)
-    {
+    for (Match *m : matches) {
         e1_wins += m->e1.wins;
         e2_wins += m->e2.wins;
         draws += m->draws;
-
         delete m;
     }
 
