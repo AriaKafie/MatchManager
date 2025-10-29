@@ -49,6 +49,18 @@ void Position::init()
         Zobrist::castling[rights] = rng();
 }
 
+Bitboard Position::checkers()
+{
+    Color us = side_to_move(), them = !us;
+
+    Square ksq = lsb(bb(make_piece(us, KING)));
+
+    return PawnAttacks[us][ksq]                &  bb(make_piece(them, PAWN))
+         | knight_attacks(ksq)                 &  bb(make_piece(them, KNIGHT))
+         | attacks_bb(BISHOP, ksq, occupied()) & (bb(make_piece(them, QUEEN)) | bb(make_piece(them, BISHOP)))
+         | attacks_bb(ROOK,   ksq, occupied()) & (bb(make_piece(them, QUEEN)) | bb(make_piece(them, ROOK)));
+}
+
 GameState Position::game_state()
 {
     if (state_info.halfmove_clock >= 100)
@@ -63,18 +75,8 @@ GameState Position::game_state()
             return REPETITION;
     }       
     
-    if (Move list[MAX_MOVES], *end = get_moves(list); list == end)
-    {
-        Color us = side_to_move(), them = !us;
-
-        Square ksq = lsb(bb(make_piece(us, KING)));
-
-        Bitboard checkers = PawnAttacks[us][ksq]                &  bb(make_piece(them, PAWN))
-                          | knight_attacks(ksq)                 &  bb(make_piece(them, KNIGHT))
-                          | attacks_bb(BISHOP, ksq, occupied()) & (bb(make_piece(them, QUEEN)) | bb(make_piece(them, BISHOP)))
-                          | attacks_bb(ROOK,   ksq, occupied()) & (bb(make_piece(them, QUEEN)) | bb(make_piece(them, ROOK)));
-
-        return checkers ? MATE : STALEMATE;
+    if (Move list[MAX_MOVES], *end = get_moves(list); list == end) {
+        return checkers() ? MATE : STALEMATE;
     }
 
     return ONGOING;

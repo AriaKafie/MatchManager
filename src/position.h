@@ -42,6 +42,7 @@ public:
     std::string to_string() const;
     GameState game_state();
     uint64_t hash() const;
+    Bitboard checkers();
 
     bool kingside_rights  (Color Perspective) const { return state_info.castling_rights & (Perspective == WHITE ? 0b1000 : 0b0010); }
     bool queenside_rights (Color Perspective) const { return state_info.castling_rights & (Perspective == WHITE ? 0b0100 : 0b0001); }

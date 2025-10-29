@@ -24,7 +24,7 @@ uint64_t unix_ms() {
 }
 
 Color random_color() {
-    static std::mt19937_64 rng(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
+    static std::mt19937_64 rng(unix_ms());
     return rng() & 1;
 }
 
@@ -76,8 +76,8 @@ void Match::run(Status *status)
         int minutes = (eta_seconds % 3600) / 60;
         int seconds = eta_seconds % 60;
 
-        std::ostringstream oss;
-        oss << std::setw(2) << std::setfill('0') << hours << ":"
+        std::ostringstream eta;
+        eta << std::setw(2) << std::setfill('0') << hours   << ":"
             << std::setw(2) << std::setfill('0') << minutes << ":"
             << std::setw(2) << std::setfill('0') << seconds;
 
@@ -95,62 +95,79 @@ void Match::run(Status *status)
             (int)elo_margin(e1.wins, e2.wins, draws),
             i,
             fens.size(),
-            oss.str().c_str()
+            eta.str().c_str()
         );
 
         pos.set(fen);
 
         Color e1_color = random_color(), e2_color = !e1_color;
 
-        std::string game_string = "position fen " + fen;
+        std::stringstream uci, pgn;
 
-        e1.write_to_stdin("ucinewgame\n" + game_string + "\n");
-        e2.write_to_stdin("ucinewgame\n" + game_string + "\n");
+        uci << "position fen " << fen;
 
-        game_string += " moves";
-        log << game_string;
+        pgn << "[White \"" << (e1_color == WHITE ? e1.name() : e2.name()) << "\"]\n"
+            << "[Black \"" << (e1_color == BLACK ? e1.name() : e2.name()) << "\"]\n"
+            << "[FEN \"" << fen << "\"]\n";
 
-        while (*status != QUIT)
+        if (pos.black_to_move()) pgn << "1... ";
+
+        e1.write_to_stdin("ucinewgame\n" + uci.str() + "\n");
+        e2.write_to_stdin("ucinewgame\n" + uci.str() + "\n");
+
+        uci << " moves";
+        log << uci.str() << std::flush;
+
+        for (int pgn_num = 1; *status != QUIT;)
         {
             for (;*status == PAUSE; Sleep(100));
 
             Engine& engine = pos.side_to_move() == e1_color ? e1 : e2;
 
-            std::string movestr = engine.best_move();
-            Move        move    = pos.uci_to_move(movestr);
+            std::string uci_move = engine.best_move();
+            Move move = pos.uci_to_move(uci_move);
 
             if (move == Move::null())
             {
-                log                                                      << std::endl
-                    << uci_to_pgn(game_string, e1_color, e2_color)       << std::endl
-                    << pos.to_string()                                   << std::endl
-                    << engine.name() << ": " << movestr << " <- Invalid" << std::endl;
+                log << std::endl
+                    << pgn.str() << std::endl
+                    << pos.to_string() << std::endl
+                    << engine.name() << ": " << uci_move << " <- Invalid" << std::endl;
 
                 failed = true;
                 break;
             }
 
-            game_string += " " + movestr;
-            log << " " << movestr;
+            if (pos.white_to_move())
+                pgn << pgn_num << ". ";
+            pgn << move_to_san(move, pos) << " ";
+            if (pos.black_to_move())
+                pgn_num++;
 
-            e1.write_to_stdin(game_string + "\n");
-            e2.write_to_stdin(game_string + "\n");
+            uci << " " << uci_move;
+            log << " " << uci_move << std::flush;
+
+            e1.write_to_stdin(uci.str() + "\n");
+            e2.write_to_stdin(uci.str() + "\n");
 
             pos.do_move(move);
 
             if (GameState g = pos.game_state(); g != ONGOING)
             {
-                if (g == MATE)
+                if (g == MATE) {
                     engine.wins++;
-                else
+                    pgn << (pos.white_to_move() ? "0-1" : "1-0");
+                } else {
                     draws++;
+                    pgn << "1/2-1/2";
+                }
 
                 log << std::endl
-                    << uci_to_pgn(game_string, e1_color, e2_color) << std::endl
+                    << pgn.str() << std::endl
                     << (g == MATE       ? "Checkmate"
                       : g == STALEMATE  ? "Stalemate"
                       : g == REPETITION ? "Repetition"
-                      : g == FIFTY_MOVE ? "Fifty-move rule" : "?") << std::endl
+                      : g == FIFTY_MOVE ? "Fifty-move rule" : "?") << " "
                     << e1.name() << ": " << e1.wins << " " << e2.name() << ": " << e2.wins << " Draws: " << draws << "\n" << std::endl;
 
                 break;

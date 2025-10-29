@@ -1,6 +1,8 @@
 
 #include "uci.h"
 
+#include <sstream>
+
 Move Position::uci_to_move(const std::string& uci) const
 {
     for (Move list[MAX_MOVES], *m = list, *end = get_moves(list); m != end; m++)
@@ -9,7 +11,7 @@ Move Position::uci_to_move(const std::string& uci) const
     return Move::null();
 }
 
-std::string move_to_san(Move m, Position& pos)
+std::string move_to_san(Move m, Position pos)
 {
     char pt2c[] = "  PNBRQK";
 
@@ -17,20 +19,38 @@ std::string move_to_san(Move m, Position& pos)
     PieceType pt = pos.piece_type_on(from);
     bool capture = pos.piece_on(to) || m.type_of() == ENPASSANT;
 
-    std::string san;
+    std::stringstream san;
 
-    if (pt == PAWN)
+    if (m.type_of() == CASTLING)
+    {
+        san << (square_to_uci(to)[0] == 'g' ? "O-O" : "O-O-O");
+    }
+    else if (pt == PAWN)
     {
         if (capture)
-            san = std::string(1, "hgfedcba"[from % 8]) + "x" + square_to_uci(to);
+            san << square_to_uci(from)[0] << "x" << square_to_uci(to);
         else
-            san = square_to_uci(to);
+            san << square_to_uci(to);
 
-        return m.type_of() == PROMOTION ? san + "=" + pt2c[m.promotion_type()] : san;
+        if (m.type_of() == PROMOTION)
+            san << "=" << pt2c[m.promotion_type()];
+    }
+    else
+    {
+        if (capture)
+            san << pt2c[pt] << square_to_uci(from) << "x" << square_to_uci(to);
+        else
+            san << pt2c[pt] << square_to_uci(from) << square_to_uci(to);
+    }
+    
+    pos.do_move(m);
+
+    if (pos.game_state() == MATE) {
+        san << '#';
+    }
+    else if (pos.checkers()) {
+        san << '+';
     }
 
-    if (capture)
-        return std::string(1, pt2c[pt]) + square_to_uci(from) + "x" + square_to_uci(to);
-
-    return std::string(1, pt2c[pt]) + square_to_uci(from) + square_to_uci(to);
+    return san.str();
 }

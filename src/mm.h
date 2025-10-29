@@ -16,17 +16,13 @@ enum Status { PAUSE, GO, QUIT };
 class Match
 {
 public:
-    Match(std::string path_1,
-          std::string path_2,
-          int         time,
-          int         id, 
-          std::string fenpath) : e1(path_1, time, id),
-                                 e2(path_2, time, id), m_id(id), failed(false), draws(0)
+    Match(std::string path_1, std::string path_2, int time, int id, std::string fenpath)
+        : e1(path_1, time, id), e2(path_2, time, id), m_id(id), failed(false), draws(0)
     {
         e1.write_to_stdin("noverbose\nuci\nisready\n");
         e2.write_to_stdin("noverbose\nuci\nisready\n");
 
-        log.open(std::string("logs\\")+e1.name()+"_"+e2.name()+"_"+std::to_string(time)+"_id"+std::to_string(m_id)+".txt");
+        log.open("logs\\"+e1.name()+"_"+e2.name()+"_"+std::to_string(time)+"_id"+std::to_string(m_id)+".txt");
         
         std::string fen;
         for (std::ifstream fenfile(fenpath); std::getline(fenfile, fen); fens.push_back(fen));
@@ -45,64 +41,11 @@ public:
     int    draws;
 
 private:
-    std::string uci_to_pgn(const std::string& uci, Color e1_color, Color e2_color);
-
     Position                 pos;
     int                      m_id;
     bool                     failed;
     std::ofstream            log;
     std::vector<std::string> fens;
 };
-
-inline std::string Match::uci_to_pgn(const std::string& uci, Color e1_color, Color e2_color)
-{
-    std::string pgn, fen, token;
-    Position p;
-    std::istringstream is(uci);
-
-    while (is >> token)
-    {
-        if (token == "startpos")
-        {
-            fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-            is >> token;
-            break;
-        }
-        else if (token == "fen")
-        {
-            for (;is >> token && token != "moves"; fen += token + " ");
-            break;
-        }
-    }
-
-    p.set(fen);
-
-    pgn += "[White \"" + (e1_color == WHITE ? e1.name() : e2.name()) + "\"]\n";
-    pgn += "[Black \"" + (e1_color == BLACK ? e1.name() : e2.name()) + "\"]\n";
-    pgn += "[FEN \"" + fen.substr(0, fen.size() - 1) + "\"]\n";
-
-    for (int ply = 0, movenum = 1; is >> token; ply++)
-    {
-        Move move = p.uci_to_move(token);
-
-        if (p.white_to_move())
-        {
-            pgn += std::to_string(movenum) + ". " + move_to_san(move, p) + " ";
-            p.do_move(move);
-        }
-        else
-        {
-            if (ply == 0)
-                pgn += "1... " + move_to_san(move, p) + " ";
-            else
-                pgn += move_to_san(move, p) + " ";
-
-            p.do_move(move);
-            movenum++;
-        }
-    }
-
-    return pgn;
-}
 
 #endif
