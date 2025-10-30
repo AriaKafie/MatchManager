@@ -10,8 +10,7 @@
 
 constexpr int MAX_MOVES = 128;
 
-enum GameState
-{
+enum GameState {
     ONGOING,
     MATE,
     STALEMATE,
@@ -19,8 +18,7 @@ enum GameState
     FIFTY_MOVE,
 };
 
-struct StateInfo
-{
+struct StateInfo {
     Square  ep_sq;
     uint8_t castling_rights;
     Color   side_to_move;

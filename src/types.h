@@ -11,19 +11,19 @@ typedef uint8_t  PieceType;
 typedef uint8_t  Color;
 typedef int8_t   Direction;
 typedef int8_t   Square;
+typedef int      File;
+typedef int      Rank;
 
 enum { WHITE, BLACK, COLOR_NB = 2 };
 
-enum
-{
+enum {
     NO_PIECE,
       PAWN =          2,   KNIGHT,   BISHOP,   ROOK,   QUEEN,   KING,
     W_PAWN =       PAWN, W_KNIGHT, W_BISHOP, W_ROOK, W_QUEEN, W_KING,
     B_PAWN = W_PAWN + 8, B_KNIGHT, B_BISHOP, B_ROOK, B_QUEEN, B_KING,
 };
 
-enum
-{
+enum {
     H1, G1, F1, E1, D1, C1, B1, A1,
     H2, G2, F2, E2, D2, C2, B2, A2,
     H3, G3, F3, E3, D3, C3, B3, A3,
@@ -35,8 +35,7 @@ enum
     NO_SQ = 0, SQUARE_NB = 64
 };
 
-enum
-{
+enum {
     NORMAL           = 0,
     PROMOTION        = 1 << 12,
     ENPASSANT        = 2 << 12,
@@ -47,8 +46,29 @@ enum
     QUEEN_PROMOTION  = PROMOTION + ((QUEEN - KNIGHT) << 14)
 };
 
-enum
-{
+enum {
+    FILE_H_ENUM,
+    FILE_G_ENUM,
+    FILE_F_ENUM,
+    FILE_E_ENUM,
+    FILE_D_ENUM,
+    FILE_C_ENUM,
+    FILE_B_ENUM,
+    FILE_A_ENUM
+};
+
+enum {
+    RANK_1_ENUM,
+    RANK_2_ENUM,
+    RANK_3_ENUM,
+    RANK_4_ENUM,
+    RANK_5_ENUM,
+    RANK_6_ENUM,
+    RANK_7_ENUM,
+    RANK_8_ENUM
+};
+
+enum {
     NORTH      = 8,
     EAST       = -1,
     SOUTH      = -8,
@@ -105,6 +125,14 @@ constexpr Piece make_piece(Color c, PieceType pt) {
 
 inline Color color_of(Piece p) {
     return p >> 3;
+}
+
+inline File file_of(Square s) {
+    return s & 7;
+}
+
+inline Rank rank_of(Square s) {
+    return s >> 3;
 }
 
 inline bool is_ok(Square s) {

@@ -104,7 +104,7 @@ void Match::run(Status *status)
 
         std::stringstream uci, pgn;
 
-        uci << "position fen " << fen;
+        uci << "position fen " << fen << " ";
 
         pgn << "[White \"" << (e1_color == WHITE ? e1.name() : e2.name()) << "\"]\n"
             << "[Black \"" << (e1_color == BLACK ? e1.name() : e2.name()) << "\"]\n"
@@ -115,7 +115,7 @@ void Match::run(Status *status)
         e1.write_to_stdin("ucinewgame\n" + uci.str() + "\n");
         e2.write_to_stdin("ucinewgame\n" + uci.str() + "\n");
 
-        uci << " moves";
+        uci << "moves ";
         log << uci.str() << std::flush;
 
         for (int pgn_num = 1; *status != QUIT;)
@@ -144,8 +144,8 @@ void Match::run(Status *status)
             if (pos.black_to_move())
                 pgn_num++;
 
-            uci << " " << uci_move;
-            log << " " << uci_move << std::flush;
+            uci << uci_move << " ";
+            log << uci_move << " " << std::flush;
 
             e1.write_to_stdin(uci.str() + "\n");
             e2.write_to_stdin(uci.str() + "\n");

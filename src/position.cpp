@@ -12,8 +12,7 @@
 
 constexpr std::string_view piece_to_char = "  PNBRQK  pnbrqk";
 
-namespace Zobrist
-{
+namespace Zobrist {
     static uint64_t enpassant[SQUARE_NB];
     static uint64_t Side = 0xeeb3b2fe864d41e5ull;
     static uint64_t hash[B_KING + 1][SQUARE_NB];
