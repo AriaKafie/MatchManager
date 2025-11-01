@@ -50,8 +50,6 @@ public:
 
     Color side_to_move() const { return state_info.side_to_move; }
 
-    Move uci_to_move(const std::string& uci) const;
-
     Piece piece_on(Square sq) const { return board[sq]; }
 
     PieceType piece_type_on(Square sq) const { return type_of(board[sq]); }

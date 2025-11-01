@@ -3,9 +3,9 @@
 
 #include <sstream>
 
-Move Position::uci_to_move(const std::string& uci) const
+Move uci_to_move(const std::string& uci, const Position& pos)
 {
-    for (Move list[MAX_MOVES], *m = list, *end = get_moves(list); m != end; m++)
+    for (Move list[MAX_MOVES], *m = list, *end = pos.get_moves(list); m != end; m++)
         if (move_to_uci(*m) == uci) return *m;
 
     return Move::null();
@@ -83,8 +83,7 @@ std::string move_to_san(Move m, Position pos)
 
     if (pos.game_state() == MATE) {
         san << '#';
-    }
-    else if (pos.checkers()) {
+    } else if (pos.checkers()) {
         san << '+';
     }
 

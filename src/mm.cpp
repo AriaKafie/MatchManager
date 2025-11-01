@@ -46,16 +46,14 @@ void handle_stdin(Status *status)
 
     do
     {
-        std::getline(std::cin, in);
-        std::istringstream is(in);
-        is >> in;
+        std::cin >> in;
 
         if (in == "pause")
             *status = PAUSE;
         else if (in == "go")
             *status = GO;
 
-    } while (in != "stop" && in != "quit");
+    } while (in != "quit");
 
     *status = QUIT;
 }
@@ -82,7 +80,7 @@ void Match::run(Status *status)
             << std::setw(2) << std::setfill('0') << seconds;
 
         printf
-        (   
+        (
             "%s Match %d %s %d %s %d Draws %d (%+d +/- %d) Game %d/%llu ETA %s\n",
             time_().c_str(),
             m_id,
@@ -125,7 +123,7 @@ void Match::run(Status *status)
             Engine& engine = pos.side_to_move() == e1_color ? e1 : e2;
 
             std::string uci_move = engine.best_move();
-            Move move = pos.uci_to_move(uci_move);
+            Move move = uci_to_move(uci_move, pos);
 
             if (move == Move::null())
             {
