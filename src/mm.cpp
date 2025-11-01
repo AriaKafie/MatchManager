@@ -48,8 +48,8 @@ void handle_stdin(Status *status)
     {
         std::cin >> in;
 
-        if (in == "pause")
-            *status = PAUSE;
+        if (in == "stop")
+            *status = STOP;
         else if (in == "go")
             *status = GO;
 
@@ -118,7 +118,7 @@ void Match::run(Status *status)
 
         for (int pgn_num = 1; *status != QUIT;)
         {
-            for (;*status == PAUSE; Sleep(100));
+            for (;*status == STOP; Sleep(100));
 
             Engine& engine = pos.side_to_move() == e1_color ? e1 : e2;
 

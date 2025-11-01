@@ -11,7 +11,7 @@
 #include "position.h"
 #include "uci.h"
 
-enum Status { PAUSE, GO, QUIT };
+enum Status { STOP, GO, QUIT };
 
 class Match
 {
