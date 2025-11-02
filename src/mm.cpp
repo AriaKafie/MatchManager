@@ -64,8 +64,6 @@ void Match::run(Status *status)
 
     for (int i = 0; i < fens.size(); i++)
     {
-        std::string fen = fens[i];
-
         uint64_t elapsed = unix_ms() - start_time;
         uint64_t time_per_game = elapsed / std::max(1, i);
         uint64_t eta_seconds = time_per_game * (fens.size() - i) / 1000;
@@ -96,17 +94,17 @@ void Match::run(Status *status)
             eta.str().c_str()
         );
 
-        pos.set(fen);
+        pos.set(fens[i]);
 
         Color e1_color = random_color(), e2_color = !e1_color;
 
         std::stringstream uci, pgn;
 
-        uci << "position fen " << fen << " ";
+        uci << "position fen " << fens[i] << " ";
 
         pgn << "[White \"" << (e1_color == WHITE ? e1.name() : e2.name()) << "\"]\n"
             << "[Black \"" << (e1_color == BLACK ? e1.name() : e2.name()) << "\"]\n"
-            << "[FEN \"" << fen << "\"]\n";
+            << "[FEN \"" << fens[i] << "\"]\n";
 
         if (pos.black_to_move()) pgn << "1... ";
 

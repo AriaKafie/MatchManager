@@ -1,6 +1,7 @@
 
 #include "uci.h"
 
+#include <algorithm>
 #include <sstream>
 
 Move uci_to_move(const std::string& uci, const Position& pos)
@@ -41,42 +42,32 @@ std::string move_to_san(Move m, Position pos)
     }
     else
     {
-        san << pt2c[pt];
+        int i;
+        std::vector<std::string> notations[4];
 
-        bool needs_disambig = false;
-        bool needs_file_disambig = false;
-        bool needs_rank_disambig = false;
-
-        for (Move list[128], *mp = list, *end = pos.get_moves(list); mp != end; mp++)
+        for (Move list[MAX_MOVES], *mp = list, *end = pos.get_moves(list); mp != end; mp++)
         {
+            if (*mp == m) i = mp - list;
+
             Square f = mp->from_sq();
             Square t = mp->to_sq();
 
-            if (*mp != m && pos.piece_on(f) == pc && t == to)
-            {
-                needs_disambig = true;
+            std::string left = std::string(1, pt2c[type_of(pos.piece_on(f))]);
+            std::string right = pos.piece_on(t)
+                ? std::string("x") + square_to_uci(t)
+                : square_to_uci(t);
 
-                if (rank_of(f) == rank_of(from))
-                    needs_file_disambig = true;
+            char file = f2c[file_of(f)];
+            char rank = r2c[rank_of(f)];
 
-                if (file_of(f) == file_of(from))
-                    needs_rank_disambig = true;
-            }
+            notations[0].push_back(left + right);
+            notations[1].push_back(left + file + right);
+            notations[2].push_back(left + rank + right);
+            notations[3].push_back(left + file + rank + right);
         }
 
-        if (needs_disambig && !needs_file_disambig && !needs_rank_disambig)
-            san << f2c[file_of(from)];
-
-        if (needs_file_disambig)
-            san << f2c[file_of(from)];
-
-        if (needs_rank_disambig)
-            san << r2c[rank_of(from)];
-
-        if (capture)
-            san << "x";
-
-        san << square_to_uci(to);
+        for (const std::vector<std::string>& v : notations)
+            if (std::count(v.begin(), v.end(), v[i]) == 1) { san << v[i]; break; }
     }
     
     pos.do_move(m);
