@@ -14,7 +14,7 @@ MatchManager --time=250 --engine1=path\to\engine1.exe --engine2=path\to\engine2.
 
 Pause all matches:
 ```
-pause
+stop
 ```
 
 Resume all matches:
@@ -22,7 +22,7 @@ Resume all matches:
 go
 ```
 
-Stop all matches (and display all data gathered thus far):
+End all matches (and display all data gathered thus far):
 ```
-stop
+quit
 ```
