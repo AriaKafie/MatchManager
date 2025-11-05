@@ -77,8 +77,7 @@ void Match::run(Status *status)
             << std::setw(2) << std::setfill('0') << minutes << ":"
             << std::setw(2) << std::setfill('0') << seconds;
 
-        printf
-        (
+        printf (
             "%s Match %d %s %d %s %d Draws %d (%+d +/- %d) Game %d/%llu ETA %s\n",
             time_().c_str(),
             m_id,
@@ -125,10 +124,9 @@ void Match::run(Status *status)
 
             if (move == Move::null())
             {
-                log << std::endl
-                    << pgn.str() << std::endl
-                    << pos.to_string() << std::endl
-                    << engine.name() << ": " << uci_move << " <- Invalid" << std::endl;
+                log << std::endl << pgn.str() 
+                    << std::endl << pos.to_string()
+                    << std::endl << engine.name() << ": " << uci_move << " <- Invalid";
 
                 failed = true;
                 break;
@@ -158,12 +156,11 @@ void Match::run(Status *status)
                     pgn << "1/2-1/2";
                 }
 
-                log << std::endl
-                    << pgn.str() << std::endl
-                    << (g == MATE       ? "Checkmate"
-                      : g == STALEMATE  ? "Stalemate"
-                      : g == REPETITION ? "Repetition"
-                      : g == FIFTY_MOVE ? "Fifty-move rule" : "?") << " "
+                log << std::endl << pgn.str() 
+                    << std::endl << (g == MATE       ? "Checkmate"
+                                   : g == STALEMATE  ? "Stalemate"
+                                   : g == REPETITION ? "Repetition"
+                                   : g == FIFTY_MOVE ? "Fifty-move rule" : "?") << " "
                     << e1.name() << ": " << e1.wins << " " << e2.name() << ": " << e2.wins << " Draws: " << draws << "\n" << std::endl;
 
                 break;
